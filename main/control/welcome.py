@@ -22,7 +22,13 @@ network = pylast.LastFMNetwork(api_key = API_KEY, api_secret =
 ###############################################################################
 @app.route('/')
 def welcome():
-  return flask.render_template('welcome.html', html_class='welcome')
+	discover_list = model.Track.query(model.Track.musicbrainz_trackid != '' and model.Track.stream_url != "")
+	new_songs = model.Track.query().order(model.Track.created).fetch(limit=8)
+  	return flask.render_template('welcome.html', 
+  		html_class='welcome',
+  		discover_list=discover_list,
+  		new_songs=new_songs
+		)
 
 @app.route('/genres')
 def genres():

@@ -82,7 +82,7 @@ Contributions and Ideas
 Author
 ------
 
-[![Lipis flair on stackoverflow.com][lipisflair]][lipis]
+[![Xenon on stackoverflow.com][xenonflair]][xenon]
 
 [bootstrap]: http://getbootstrap.com/
 [bower]: http://bower.io/
@@ -103,8 +103,8 @@ Author
 [less]: http://lesscss.org/
 [lesscss]: http://lesscss.org/
 [linux]: http://www.ubuntu.com
-[lipis]: http://stackoverflow.com/users/8418/lipis
-[lipisflair]: http://stackexchange.com/users/flair/5282.png
+[xenon]: http://stackoverflow.com/users/1176640/xenon
+[xenonflair]: http://stackexchange.com/users/flair/1207323.png
 [mdxs]: https://github.com/mdxs
 [moment.js]: http://momentjs.com/
 [ndb]: https://developers.google.com/appengine/docs/python/ndb/
