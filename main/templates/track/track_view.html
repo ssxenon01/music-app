@@ -1,0 +1,33 @@
+# extends 'base.html'
+
+# block content
+  <div class="page-header">
+    <h1>{{title}}</h1>
+  </div>
+    <p>{{track_db.album}}</p>
+    <p>{{track_db.title}}</p>
+    <p>{{track_db.artist}}</p>
+    <p>{{track_db.albumartist}}</p>
+    <p>{{track_db.originaldate}}</p>
+    <p>{{track_db.composer}}</p>
+    <p>{{track_db.lyricist}}</p>
+    <p>{{track_db.writer}}</p>
+    <p>{{track_db.totaltracks}}</p>
+    <p>{{track_db.discnumber}}</p>
+    <p>{{track_db.genre}}</p>
+    <p>{{track_db.rating}}</p>
+    <p>{{track_db.musicbrainz_recordingid}}</p>
+    <p>{{track_db.musicbrainz_trackid}}</p>
+    <p>{{track_db.musicbrainz_albumid}}</p>
+    <p>{{track_db.musicbrainz_artistid}}</p>
+    <p>{{track_db.musicbrainz_albumartistid}}</p>
+    <p>{{track_db.language}}</p>
+    <p>{{track_db.website}}</p>
+    <p>{{track_db.stream_url}}</p>
+  <hr>
+  <p>
+    <a href="{{url_for('track_list')}}">Буцах</a>
+  </p><p>
+    <a href="/track/{{track_db.key.id()}}/update">Засварлах</a>
+  </p>
+# endblock

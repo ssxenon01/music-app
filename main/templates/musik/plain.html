@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" class="app">
+<head>  
+    # include 'musik/meta.html'
+    <title>
+      # block title
+        {{title + ' |' if title}}
+      # endblock
+      {{config.CONFIG_DB.brand_name}}
+    </title>
+    # include 'musik/style.html'
+    # block head
+    # endblock
+    # include 'musik/analytics.html'
+</head>
+<body class="">
+    
+  # block content
+  # endblock
+  
+  # include 'musik/script.html'
+
+</body>
+</html>

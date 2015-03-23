@@ -1,0 +1,27 @@
+# if config.CONFIG_DB.feedback_email
+  <li class="{{'active' if html_class == 'feedback'}}">
+    <a href="{{url_for('feedback')}}"><span class="fa fa-comment"></span> Санал Хүсэлт</a>
+  </li>
+# endif
+<li class="dropdown">
+	<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+	  <span class="fa fa-music"></span>
+	 	Дуу
+	  <b class="caret"></b>
+	</a>
+	<ul class="dropdown-menu">
+	  	<li><a href="{{url_for('track_list')}}"><span class="fa fa-fw fa-list"></span>Дууны жагсаалт</a></li>
+	  	<li><a href="{{url_for('track_create')}}"><span class="fa fa-fw fa-plus"></span>Дуу Нэмэх</a></li>
+	</ul>
+</li>
+<li class="dropdown">
+	<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+	  <span class="fa fa-group"></span>
+	 	Хамтлаг & Дуучин
+	  <b class="caret"></b>
+	</a>
+	<ul class="dropdown-menu">
+	  	<li><a href="{{url_for('artist_list')}}"><span class="fa fa-fw fa-list"></span>Жагсаалт</a></li>
+	  	<li><a href="{{url_for('artist_create')}}"><span class="fa fa-fw fa-plus"></span>Нэмэх</a></li>
+	</ul>
+</li>

@@ -1,0 +1,33 @@
+# extends 'base.html'
+
+# block content
+  <div class="page-header">
+    <h1>{{title}}</h1>
+  </div>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>gender</th>
+        <th>mbid</th>
+        <th>website</th>
+        <th>image</th>
+      </tr>
+    </thead>
+    <tbody>
+      # for artist_db in artist_dbs
+        <tr>
+          <td><a href="/artist/{{artist_db.key.id()}}">{{artist_db.key.id()}}</a></td>
+          <td>{{artist_db.name}}</td>
+          <td>{{artist_db.artist_type}}</td>
+          <td>{{artist_db.gender}}</td>
+          <td>{{artist_db.mbid}}</td>
+          <td>{{artist_db.website}}</td>
+          <td>{{artist_db.image_url}}</td>
+        </tr>
+      # endfor
+    </tbody>
+  </table>
+# endblock

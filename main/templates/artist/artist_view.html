@@ -1,0 +1,20 @@
+# extends 'base.html'
+
+# block content
+  <div class="page-header">
+    <h1>{{title}}</h1>
+  </div>
+    <p>{{artist_db.name}}</p>
+    <p>{{artist_db.artist_type}}</p>
+    <p>{{artist_db.gender}}</p>
+    <p>{{artist_db.mbid}}</p>
+    <p>{{artist_db.website}}</p>
+    <p>{{artist_db.image_url}}</p>
+  <hr>
+  <p>
+    <a href="{{url_for('artist_list')}}">Буцах</a>
+  </p>
+  <p>
+    <a href="/artist/{{artist_db.key.id()}}/update">Засварлах</a>
+  </p>
+# endblock

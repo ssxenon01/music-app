@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" class="app">
+<head>  
+    # include 'musik/meta.html'
+    <title>
+      # block title
+        {{title + ' |' if title}}
+      # endblock
+      {{config.CONFIG_DB.brand_name}}
+    </title>
+    # include 'musik/style.html'
+    # block head
+    # endblock
+    # include 'musik/analytics.html'
+</head>
+<body class="">
+  <section class="vbox">
+    
+    # include 'musik/header.html'
+
+    <section>
+      <section class="hbox stretch">
+         <!-- .aside -->
+        # include 'musik/aside.html'
+        <!-- /.aside -->
+        
+            # block section
+            #endblock   
+            <section>
+              <section class="vbox">
+                
+                # block content
+                #endblock
+                
+                # include 'musik/jplayer.html'
+
+              </section>
+            </section>
+            <!-- side content -->
+                # block side
+                # endblock
+            <!-- / side content -->
+          </section>
+          <a href="#" class="hide nav-off-screen-block" data-toggle="class:nav-off-screen,open" data-target="#nav,html"></a>
+        </section>
+       
+  </section>
+  
+  # include 'musik/script.html'
+
+</body>
+</html>

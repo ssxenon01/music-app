@@ -1,0 +1,44 @@
+# extends 'base.html'
+# import 'macro/forms.html' as forms
+
+# block content
+  <div class="page-header">
+    <h1>{{title}}</h1>
+  </div>
+  <div class="row">
+    <div class="col-md-4">
+      <form method="POST" action=".">
+        <fieldset>
+          {{form.csrf_token}}
+          {{forms.text_field(form.title, autofocus=True)}}
+          {{forms.text_field(form.album)}}
+          {{forms.text_field(form.artist)}}
+          {{forms.text_field(form.albumartist)}}
+          {{forms.text_field(form.originaldate)}}
+          {{forms.text_field(form.composer)}}
+          {{forms.text_field(form.lyricist)}}
+          {{forms.text_field(form.writer)}}
+          {{forms.text_field(form.totaltracks)}}
+          {{forms.text_field(form.discnumber)}}
+          {{forms.text_field(form.genre)}}
+          {{forms.text_field(form.rating)}}
+          {{forms.text_field(form.musicbrainz_recordingid)}}
+          {{forms.text_field(form.musicbrainz_trackid)}}
+          {{forms.text_field(form.musicbrainz_albumid)}}
+          {{forms.text_field(form.musicbrainz_artistid)}}
+          {{forms.text_field(form.musicbrainz_albumartistid)}}
+          {{forms.text_field(form.language)}}
+          {{forms.text_field(form.website)}}
+          {{forms.text_field(form.stream_url)}}
+          <button type="submit" class="btn btn-primary btn-block">
+            # if track_db
+              Шинэчлэх
+            # else
+              Үүсгэх
+            # endif
+          </button>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+# endblock
