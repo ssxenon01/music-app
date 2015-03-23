@@ -1,19 +1,16 @@
-gae-init
+music-app
 ========
 
-**gae-init** is the easiest way to kick start new applications on Google
+**music-app** is the Music Platform based on gae-init , Google
 App Engine using Flask, Bootstrap and tons of other cool features.
 
-Read more in the [docs][], where you can find a complete [feature list][],
-a detailed [tutorial][] on how to build a phonebook application and more..
-
 The latest version is always accessible from
-[http://gae-init.appspot.com](http://gae-init.appspot.com)
+[http://listen-fm.appspot.com](http://listen-fm.appspot.com)
 
 Running the Development Environment
 -----------------------------------
 
-    $ cd /path/to/project-name
+    $ cd /path/to/music-app
     $ ./run.py -s
 
 To test it visit `http://localhost:8080/` in your browser.
@@ -91,8 +88,6 @@ Author
 [bower]: http://bower.io/
 [chris]: http://stackoverflow.com/users/226394/chris-top
 [coffeescript]: http://coffeescript.org/
-[docs]: http://docs.gae-init.appspot.com
-[feature list]: http://docs.gae-init.appspot.com/features/
 [flask-restful]: https://flask-restful.readthedocs.org
 [flask-wtf]: https://flask-wtf.readthedocs.org
 [flask]: http://flask.pocoo.org/
@@ -121,7 +116,6 @@ Author
 [python 2.7]: https://developers.google.com/appengine/docs/python/python27/using27
 [social buttons]: http://lipis.github.io/bootstrap-social/
 [stefanlindmark]: http://www.linkedin.com/in/stefanlindmark
-[tutorial]: http://docs.gae-init.appspot.com/tutorial/
 [tzador]: http://stackoverflow.com/users/165697/tzador
 [virtualenv]: http://www.virtualenv.org/
 [windows]: http://windows.microsoft.com/
