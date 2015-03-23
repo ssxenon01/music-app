@@ -1,5 +1,5 @@
 {
-  "name": "gae-init",
+  "name": "music-app",
   "dependencies": {
     "bootstrap": "~3",
     "bootstrap-sweetalert": "~0",

@@ -1,15 +1,14 @@
 {
-  "name": "gae-init",
-  "author": "Panayiotis Lipiridis <lipiridis@gmail.com>",
+  "name": "music-app",
+  "author": "Gundsambuu Natsagdorj <ssxenon01@gmail.com>",
   "licenses": [
     {
-      "type": "MIT",
-      "url": "http://opensource.org/licenses/MIT"
+      "type": "Unknown"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/gae-init"
+    "url": "http://github.com/ssxenon01/music-app"
   },
   "dependencies": {
     "coffee-script": "~1",
