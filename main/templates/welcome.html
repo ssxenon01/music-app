@@ -24,7 +24,7 @@
                                 <i class="fa fa-star-o text-muted"></i>
                               </div>
                               <div class="center text-center m-t-n">
-                                <a href="#" data-id="{{ track.gdrive_id }}" data-title=""><i class="icon-control-play i-2x"></i></a>
+                                <a href="#" data-id="{{ track.gdrive_id }}" data-title="{{ track.title }}" data-artist="{{ track.artist }}"><i class="icon-control-play i-2x"></i></a>
                               </div>
                               <div class="bottom padder m-b-sm">
                                 <a href="#" class="pull-right">
@@ -35,7 +35,7 @@
                                 </a>
                               </div>
                             </div>
-                            <a href="#" data-id="{{ track.gdrive_id }}">
+                            <a href="#" data-id="{{ track.gdrive_id }}" data-title="{{ track.title }}" data-artist="{{ track.artist }}">
                                 # if track.cover_img
                                 <img src="{{track.cover_img}}" alt="" class="r r-2x img-full">
                                 # else
@@ -65,7 +65,9 @@
                                   <a href="#"><i class="fa fa-play-circle i-2x"></i></a>
                                 </div>
                               </div>
-                              <a href="#"><img src="{{ track.cover_img }}" alt="" class="r r-2x img-full"></a>
+                              <a href="#" data-id="{{ track.gdrive_id }}" data-title="{{ track.title }}" data-artist="{{ track.artist }}">
+                              <img src="{{ track.cover_img }}" alt="" class="r r-2x img-full">
+                              </a>
                             </div>
                             <div class="padder-v">
                               <a href="#" class="text-ellipsis">{{track.title}}</a>

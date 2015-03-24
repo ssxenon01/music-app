@@ -48,8 +48,24 @@ $(document).ready(function () {
             myPlaylist.play(i);
         }
     });
+    var prevState;
+    $(document).on('click','a[data-id]',function(e){
+        e.preventDefault();
+        var link = $(this),
+            id = link.attr('data-id'),
+            title=link.attr('data-title'),
+            artist=link.attr('data-artist');
+        myPlaylist.setPlaylist([{
+            title:title,
+            artist:artist,
+            mp3:'https://drive.google.com/uc?&id='+id
+        }]);
+        if(prevState)
+            prevState.removeClass('active');
+        prevState = link.closest('.item-overlay');
+        prevState.addClass('active');
+        myPlaylist.play();
 
-    $(document).on('click','.pos-rlt a[data-id]',function(e){
-        console.log(e);
+
     });
 });
