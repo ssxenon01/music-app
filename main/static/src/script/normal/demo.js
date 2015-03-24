@@ -4,15 +4,15 @@ $(document).ready(function () {
         jPlayer: "#jplayer_N",
         cssSelectorAncestor: "#jp_container_N"
     }, [
-        {
+        /*{
             title: "Love Me Like You Do",
             artist: "Ellie",
             mp3: "https://drive.google.com/uc?&id=0B6PXUZA-KpFoY3hQMzM4eDkzZHM",
             poster: "/p/img/m0.jpg"
-        }
+        }*/
     ], {
         playlistOptions: {
-            autoPlay: true
+            autoPlay: false
         },
         swfPath: "/p/ext/jplayer/dist/jplayer/",
         supplied: "webmv, ogv, m4v, oga, mp3",
@@ -47,6 +47,9 @@ $(document).ready(function () {
             var i = Math.floor(Math.random() * (1 + 7 - 1));
             myPlaylist.play(i);
         }
+    });
 
+    $(document).on('click','.pos-rlt a[data-id]',function(e){
+        console.log(e);
     });
 });

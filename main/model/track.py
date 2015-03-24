@@ -119,6 +119,7 @@ class Track(model.Base):
     language = ndb.StringProperty(default='')
     website = ndb.StringProperty(default='')
     stream_url = ndb.StringProperty(default='')
+    cover_img = ndb.StringProperty(default='')
 
     FIELDS = {
         'album': fields.String,
@@ -142,6 +143,7 @@ class Track(model.Base):
         'language': fields.String,
         'website': fields.String,
         'stream_url': fields.String,
+        'cover_img': fields.String,
     }
 
     FIELDS.update(model.Base.FIELDS)
