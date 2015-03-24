@@ -19,25 +19,25 @@ from main import app
 @app.errorhandler(418)  # I'm a Teapot
 @app.errorhandler(500)  # Internal Server Error
 def error_handler(e):
-  logging.exception(e)
-  try:
-    e.code
-  except AttributeError:
-    e.code = 500
-    e.name = u'Сервэрт алдаа гарлаа'
+    logging.exception(e)
+    try:
+        e.code
+    except AttributeError:
+        e.code = 500
+        e.name = u'Сервэрт алдаа гарлаа'
 
-  if flask.request.path.startswith('/api/'):
-    return helpers.handle_error(e)
+    if flask.request.path.startswith('/api/'):
+        return helpers.handle_error(e)
 
-  return flask.render_template(
-      'error.html',
-      title=u'Алдаа %d (%s)!!1' % (e.code, e.name),
-      html_class='error-page',
-      error=e,
+    return flask.render_template(
+        'error.html',
+        title=u'Алдаа %d (%s)!!1' % (e.code, e.name),
+        html_class='error-page',
+        error=e,
     ), e.code
 
 
 if config.PRODUCTION:
-  @app.errorhandler(Exception)
-  def production_error_handler(e):
-    return error_handler(e)
+    @app.errorhandler(Exception)
+    def production_error_handler(e):
+        return error_handler(e)
