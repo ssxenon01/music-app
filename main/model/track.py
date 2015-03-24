@@ -114,6 +114,8 @@ class Track(model.Base):
     musicbrainz_albumid = ndb.StringProperty(default='')
     musicbrainz_artistid = ndb.StringProperty(default='')
     musicbrainz_albumartistid = ndb.StringProperty(default='')
+    gdrive_id = ndb.StringProperty(default='')
+    gdrive_etag = ndb.StringProperty(default='')
     language = ndb.StringProperty(default='')
     website = ndb.StringProperty(default='')
     stream_url = ndb.StringProperty(default='')

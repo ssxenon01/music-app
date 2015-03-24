@@ -1,0 +1,4 @@
+cron:
+- description: daily retrive drive songs
+  url: /tasks/gdrive
+  schedule: every 24 hours

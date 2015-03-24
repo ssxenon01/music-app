@@ -62,10 +62,11 @@ SCRIPTS = [
         'src/script/normal/app.plugin.js',
         'ext/jplayer/dist/jplayer/jquery.jplayer.js',
         'ext/jquery-pjax/jquery.pjax.js',
-        # 'ext/jPlayer/add-on/jplayer.playlist.min.js', 
+        'ext/jplayer/dist/add-on/jplayer.playlist.js',
         # 'ext/jPlayer/demo.js',
       ]),
     ('scripts', [
+        'src/script/normal/demo.js'
         # 'src/script/common/api.coffee',
         # 'src/script/common/util.coffee',
         # 'src/script/site/app.coffee',

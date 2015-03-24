@@ -23,6 +23,13 @@
     },
     "font-awesome": {
       "main": ["less/*", "fonts/*"]
+    },
+    "jplayer":{
+      "main":[
+        "dist/jplayer/jquery.jplayer.js",
+        "dist/jplayer/jquery.jplayer.swf",
+        "dist/add-on/jplayer.playlist.js"
+      ]
     }
   }
 }
