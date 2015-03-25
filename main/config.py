@@ -64,6 +64,7 @@ SCRIPTS = [
         'ext/jplayer/dist/add-on/jplayer.playlist.js',
         'ext/jquery-placeholder/jquery.placeholder.js',
         'ext/screenfull/dist/screenfull.js',
+        'src/script/normal/tiles.js',
         'src/script/normal/app.js',
         'src/script/normal/demo.js'
       ]),

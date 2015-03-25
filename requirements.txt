@@ -8,3 +8,5 @@ unidecode==0.4.17
 pylast==1.1.0
 pyopenssl==0.14
 pycrypto
+requests==2.3.0
+discogs_client

@@ -1,4 +1,4 @@
-from lib.pylast import WSError
+from pylast import WSError
 
 __author__ = 'Gundsambuu'
 
@@ -12,12 +12,20 @@ from google.appengine.api import urlfetch, memcache
 from xml.etree import ElementTree
 from main import app
 import pylast
+import discogs_client
 from oauth2client.client import SignedJwtAssertionCredentials
 
 API_KEY = "8c57be12c08c3586cc46d3609d7f83e8"  # this is a sample key
 API_SECRET = "0e3f2355e220957076f386a8eb884b01"
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
+d = discogs_client.Client('Music/0.1')
+d._base_url = 'https://api.discogs.com'
 
+@app.route('/discogs')
+def discogs():
+    results = d.search('', title='Uptown Funk', artist="Bruno Mars", token="mhkqGGqAxmkGFOlbnWRRQZYcqDLxLianrCocIIJE",type="Artist")
+
+    return str(results[0].artists[0].name)
 
 @app.route('/tasks/gdrive')
 def task_gdrive():

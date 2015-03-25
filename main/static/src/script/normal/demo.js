@@ -5,11 +5,11 @@ $(document).ready(function () {
         cssSelectorAncestor: "#jp_container_N"
     }, [
         /*{
-            title: "Love Me Like You Do",
-            artist: "Ellie",
-            mp3: "https://drive.google.com/uc?&id=0B6PXUZA-KpFoY3hQMzM4eDkzZHM",
-            poster: "/p/img/m0.jpg"
-        }*/
+         title: "Love Me Like You Do",
+         artist: "Ellie",
+         mp3: "https://drive.google.com/uc?&id=0B6PXUZA-KpFoY3hQMzM4eDkzZHM",
+         poster: "/p/img/m0.jpg"
+         }*/
     ], {
         playlistOptions: {
             autoPlay: false
@@ -23,8 +23,9 @@ $(document).ready(function () {
 
     $(document).on($.jPlayer.event.pause, myPlaylist.cssSelector.jPlayer, function () {
         $('.musicbar').removeClass('animate');
-        $('.jp-play-me').removeClass('active');
-        $('.jp-play-me').parent('li').removeClass('active');
+        var sel = $('.jp-play-me');
+        sel.removeClass('active');
+        sel.parent('li').removeClass('active');
     });
 
     $(document).on($.jPlayer.event.play, myPlaylist.cssSelector.jPlayer, function () {
@@ -35,9 +36,9 @@ $(document).ready(function () {
         e && e.preventDefault();
         var $this = $(e.target);
         if (!$this.is('a')) $this = $this.closest('a');
-
-        $('.jp-play-me').not($this).removeClass('active');
-        $('.jp-play-me').parent('li').not($this.parent('li')).removeClass('active');
+        var sel = $('.jp-play-me');
+        sel.not($this).removeClass('active');
+        sel.parent('li').not($this.parent('li')).removeClass('active');
 
         $this.toggleClass('active');
         $this.parent('li').toggleClass('active');
@@ -49,18 +50,18 @@ $(document).ready(function () {
         }
     });
     var prevState;
-    $(document).on('click','a[data-id]',function(e){
+    $(document).on('click', 'a[data-id]', function (e) {
         e.preventDefault();
         var link = $(this),
             id = link.attr('data-id'),
-            title=link.attr('data-title'),
-            artist=link.attr('data-artist');
+            title = link.attr('data-title'),
+            artist = link.attr('data-artist');
         myPlaylist.setPlaylist([{
-            title:title,
-            artist:artist,
-            mp3:'https://drive.google.com/uc?&id='+id
+            title: title,
+            artist: artist,
+            mp3: 'https://drive.google.com/uc?&id=' + id
         }]);
-        if(prevState)
+        if (prevState)
             prevState.removeClass('active');
         prevState = link.closest('.item-overlay');
         prevState.addClass('active');
@@ -68,8 +69,8 @@ $(document).ready(function () {
 
 
     });
-});
 
+});
 if (window.console) {
     window.console.info('Юм хайж байна уу ?');
 }
