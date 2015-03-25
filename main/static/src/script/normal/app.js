@@ -232,6 +232,7 @@ Modernizr.addTest('ios7 ipad', function () {
 
     };
     var datas = {};
+    var current;
     $.fn.bjax = function (option) {
         return this.each(function () {
             var $this = $(this);
@@ -248,18 +249,19 @@ Modernizr.addTest('ios7 ipad', function () {
     $.fn.bjax.Constructor = Bjax;
 
     $(window).on("popstate", function (e) {
-        var fn = datas[document.location.pathname+''];
+        var fn = datas[document.location.pathname];
         if(fn){
+            current = document.location.pathname;
             fn['start'](true);
         }
         e.preventDefault();
     });
-    var prev;
+
     $(document).on('click.app.bjax.data-api', '[data-bjax], .nav-primary a, a.db', function (e) {
         if (!Bjax.prototype.enable(e)) return false;
         var navUrl = $(this).attr('href') || $(this).attr('data-url');
-        if(prev == navUrl) return false;
-        prev = navUrl;
+        if(current == navUrl) return false;
+        current = navUrl;
         $(this).bjax({replace:true,el:'#content-area',target:'#content-area',url: navUrl});
         return false;
     });
