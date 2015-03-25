@@ -1,0 +1,30 @@
+# extends 'musik/plain.html'
+
+# block header
+
+  <div class="jumbotron">
+    <div class="container">
+      <h2>
+
+      </h2>
+      <p>Maybe it's our fault.. maybe it's yours.. but either case, you can't access this site outside of Mongolia!</p>
+    </div>
+  </div>
+# endblock
+
+# block content
+  <section id="content" style="padding-top: 200px;">
+      <div class="row m-n">
+      <div class="col-sm-12">
+          <div class="alert alert-warning alert-block">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <h4><i class="fa fa-bell-alt"></i>Forbidden!</h4>
+            <p>We believe that you are not in Mongolia (your IP address appears to be {{ ip }}). If you believe we have made a mistake, we apologize and ask that you please email us.</p>
+            <p>Maybe it's our fault.. maybe it's yours.. but either case, you can't access this site outside of Mongolia!</p>
+          </div>
+      </div>
+      </div>
+    </section>
+    <!-- footer -->
+    #include 'musik/footer.html'
+# endblock

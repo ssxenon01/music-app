@@ -69,3 +69,7 @@ $(document).ready(function () {
 
     });
 });
+
+if (window.console) {
+    window.console.info('Юм хайж байна уу ?');
+}

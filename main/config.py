@@ -57,14 +57,15 @@ SCRIPTS = [
         'ext/bootstrap/js/tooltip.js',
         'ext/bootstrap/js/popover.js',
         'ext/bootstrap/js/carousel.js',
-        'src/script/normal/app.js',
         'ext/slimscroll/jquery.slimscroll.min.js',
         'src/script/normal/app.plugin.js',
         'ext/jplayer/dist/jplayer/jquery.jplayer.js',
         'ext/jquery-pjax/jquery.pjax.js',
         'ext/jplayer/dist/add-on/jplayer.playlist.js',
+        'ext/jquery-placeholder/jquery.placeholder.js',
+        'ext/screenfull/dist/screenfull.js',
+        'src/script/normal/app.js',
         'src/script/normal/demo.js'
-        # 'ext/jPlayer/demo.js',
       ]),
     #('scripts', [
         # 'src/script/normal/demo.js'

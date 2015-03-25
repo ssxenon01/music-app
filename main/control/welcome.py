@@ -6,26 +6,17 @@ import config
 import model
 import socket
 import struct
-
 from main import app
 
 
 # ##############################################################################
 # Welcome
 # ##############################################################################
-@app.before_request
-def limit_remote_addr():
-    if flask.request.remote_addr not in ['127.0.0.1', '0.1.0.3']:
-        if address_in_network(flask.request.remote_addr):
-            # logging.info(flask.request.remote_addr)
-            flask.abort(403)  # Forbidden
-
 
 @app.route('/')
 def welcome():
     discover_list = get_discover_list()
     new_songs = get_new_songs()
-    logging.info(flask.request.remote_addr)
     return flask.render_template('welcome.html',
                                  html_class='welcome',
                                  discover_list=discover_list,
@@ -40,7 +31,7 @@ def get_new_songs():
         return data
     else:
         data = model.Track.query().order(model.Track.created).fetch(limit=8)
-        memcache.add('key', data, 60)
+        memcache.add('key', data, 60*60)
         return data
 
 
@@ -51,7 +42,7 @@ def get_discover_list():
     else:
         data = model.Track.query(model.Track.musicbrainz_trackid != ''
                                  and model.Track.stream_url != "").fetch(limit=10)
-        memcache.add('key', data, 60)
+        memcache.add('key', data, 60*60)
         return data
 
 
@@ -80,6 +71,25 @@ def sitemap():
 def warmup():
     # TODO: put your warmup code here
     return 'success'
+
+
+# ##############################################################################
+# Checking if accessing from Mongolia
+# ##############################################################################
+
+
+@app.before_request
+def limit_remote_addr():
+    # TODO: allow SEO bot
+
+    if flask.request.remote_addr not in ['127.0.0.1', '0.1.0.3']:
+        if not address_in_network(flask.request.remote_addr):
+            flask.abort(403)  # Forbidden
+
+
+# ##############################################################################
+# List of Mongolian IP Subnet
+# ##############################################################################
 
 
 def address_in_network(ip):

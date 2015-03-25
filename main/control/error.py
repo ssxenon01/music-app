@@ -12,7 +12,6 @@ from main import app
 
 @app.errorhandler(400)  # Bad Request
 @app.errorhandler(401)  # Unauthorized
-@app.errorhandler(403)  # Forbidden
 @app.errorhandler(404)  # Not Found
 @app.errorhandler(405)  # Method Not Allowed
 @app.errorhandler(410)  # Gone
@@ -35,6 +34,15 @@ def error_handler(e):
         html_class='error-page',
         error=e,
     ), e.code
+
+
+@app.errorhandler(403)  # Forbidden
+def error_403(e):
+    return flask.render_template(
+        '403.html',
+        html_class='403',
+        ip=flask.request.remote_addr
+    )
 
 
 if config.PRODUCTION:

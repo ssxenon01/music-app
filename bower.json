@@ -12,7 +12,9 @@
     "nprogress": "https://github.com/lipis/nprogress.git#master",
     "chosen":"https://github.com/harvesthq/chosen/releases/download/v1.4.1/chosen_v1.4.1.zip",
     "jplayer":"2.9.2",
-    "simple-line-icons":"1.0.0"
+    "simple-line-icons":"1.0.0",
+    "jquery-placeholder": "2.1.1",
+    "screenfull":"~2"
   },
   "overrides": {
     "bootstrap": {
