@@ -156,23 +156,24 @@ Modernizr.addTest('ios7 ipad', function () {
         , url: ''
     };
 
-    Bjax.prototype.start = function () {
+    Bjax.prototype.start = function (popstate) {
         var that = this;
         this.backdrop();
         $.ajax(this.options.url).done(function (r) {
             that.$content = r;
-            that.complete();
+            that.complete(popstate);
         });
     };
 
-    Bjax.prototype.complete = function () {
-        if (this.$element.is('html') || (this.options.replace)) {
-            try {
-                window.history.pushState({}, '', this.options.url);
-            } catch (e) {
-                window.location.replace(this.options.url)
+    Bjax.prototype.complete = function (popstate) {
+        if(!popstate)
+            if (this.$element.is('html') || (this.options.replace)) {
+                try {
+                    window.history.pushState({}, '', this.options.url);
+                } catch (e) {
+                    window.location.replace(this.options.url)
+                }
             }
-        }
 
         this.updateBar(100);
     };
@@ -230,14 +231,16 @@ Modernizr.addTest('ios7 ipad', function () {
         return link.protocol.indexOf('http') != -1;
 
     };
-
+    var datas = {};
     $.fn.bjax = function (option) {
         return this.each(function () {
             var $this = $(this);
-            var data = $this.data('app.bjax');
+            var data = datas[option.url];
             var options = $.extend({}, Bjax.DEFAULTS, $this.data(), typeof option == 'object' && option);
-            if (!data) $this.data('app.bjax', (data = new Bjax(this, options)));
-            if (data) data['start']();
+            if (!data)
+                datas[option.url] = data = new Bjax(this, options);
+            else
+                data['start']();
             if (typeof option == 'string') data[option]()
         })
     };
@@ -245,17 +248,20 @@ Modernizr.addTest('ios7 ipad', function () {
     $.fn.bjax.Constructor = Bjax;
 
     $(window).on("popstate", function (e) {
-        if (e.originalEvent.state !== null) {
-            window.location.reload(true);
+        var fn = datas[document.location.pathname+''];
+        if(fn){
+            fn['start'](true);
         }
         e.preventDefault();
     });
-
-    $(document).on('click.app.bjax.data-api', '[data-bjax], .nav-primary a', function (e) {
-        console.log('asd');
-        if (!Bjax.prototype.enable(e)) return;
-        $(this).bjax({url: $(this).attr('href') || $(this).attr('data-url')});
-        e.preventDefault();
+    var prev;
+    $(document).on('click.app.bjax.data-api', '[data-bjax], .nav-primary a, a.db', function (e) {
+        if (!Bjax.prototype.enable(e)) return false;
+        var navUrl = $(this).attr('href') || $(this).attr('data-url');
+        if(prev == navUrl) return false;
+        prev = navUrl;
+        $(this).bjax({replace:true,el:'#content-area',target:'#content-area',url: navUrl});
+        return false;
     });
 }(jQuery);
 
