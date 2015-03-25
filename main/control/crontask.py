@@ -1,4 +1,4 @@
-
+from lib.pylast import WSError
 
 __author__ = 'Gundsambuu'
 
@@ -37,7 +37,6 @@ def task_gdrive():
     param['q'] = 'modifiedDate >= "2015-03-22T12:00:00-08:00" and mimeType contains "audio"'
     files = service.files().list(**param).execute()
     for item in files['items']:
-        logging.info(item['id'])
         stream_url = 'https://drive.google.com/uc?id=%s' % item['id']
         array = item['title'].replace('.%s' % item['fileExtension'], '').split('-')
         if model.Track.query(model.Track.gdrive_id == item['id']).count(limit=1) == 0:
@@ -49,24 +48,28 @@ def task_gdrive():
                 gdrive_etag=item['etag']
             )
             track = network.get_track(track_db.artist, track_db.title)
-            if track.get_mbid():
-                album = track.get_album()
-                if album:
-                    track_db.album = album.title
-                    track_db.musicbrainz_albumid = album.get_mbid()
-                    track_db.cover_img = track.get_album().get_cover_image(3)
-                track_db.musicbrainz_trackid = track.get_mbid()
 
-                artist = track.get_artist()
-                if artist:
-                    if model.Artist.query(model.Artist.mbid == artist.get_mbid()).count(limit=1) == 0:
-                        artist_db = model.Artist(
-                            name=artist.name,
-                            mbid=artist.get_mbid(),
-                            image_url=artist.get_cover_image(3)
-                        )
-                        artist_db.put()
-            track_db.put()
+            try:
+                if track.get_mbid():
+                    album = track.get_album()
+                    if album:
+                        track_db.album = album.title
+                        track_db.musicbrainz_albumid = album.get_mbid()
+                        track_db.cover_img = track.get_album().get_cover_image(3)
+                    track_db.musicbrainz_trackid = track.get_mbid()
+
+                    artist = track.get_artist()
+                    if artist:
+                        if model.Artist.query(model.Artist.mbid == artist.get_mbid()).count(limit=1) == 0:
+                            artist_db = model.Artist(
+                                name=artist.name,
+                                mbid=artist.get_mbid(),
+                                image_url=artist.get_cover_image(3)
+                            )
+                            artist_db.put()
+                track_db.put()
+            except WSError:
+                pass
 
     return 'ok'
 
