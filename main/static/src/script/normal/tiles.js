@@ -625,11 +625,9 @@ Tiles.UniformTemplates = {
         this.ensureTemplate(this.tiles.length);
 
         // only redraw when necessary
-        var shouldRedraw = (this.isDirty ||
-            this.tilesAdded.length > 0 ||
-            this.tilesRemoved.length > 0);
-
-        return shouldRedraw;
+        return (this.isDirty ||
+        this.tilesAdded.length > 0 ||
+        this.tilesRemoved.length > 0);
     };
 
     // redraws the grid after tile collection changes

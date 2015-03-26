@@ -7,15 +7,16 @@ $(document).ready(function () {
         /*{
          title: "Love Me Like You Do",
          artist: "Ellie",
-         mp3: "https://drive.google.com/uc?&id=0B6PXUZA-KpFoY3hQMzM4eDkzZHM",
+         mp3: "http://stream.sons.mn:6055/COHC/amlst:f5e8385f-5f15-4de7-ae05-596d7564728c/playlist.m3u8",
+         //mp3: "https://drive.google.com/uc?&id=0B6PXUZA-KpFoY3hQMzM4eDkzZHM",
          poster: "/p/img/m0.jpg"
          }*/
     ], {
         playlistOptions: {
-            autoPlay: false
+            autoPlay: true
         },
-        swfPath: "/p/ext/jplayer/dist/jplayer/",
-        supplied: "webmv, ogv, m4v, oga, mp3",
+        swfPath: "/p/ext/jplayer/dist/jplayer/jquery.jplayer.swf",
+        supplied: "webmv, ogv, m4v, oga, mp3, mpeg",
         smoothPlayBar: true,
         keyEnabled: true,
         audioFullScreen: false

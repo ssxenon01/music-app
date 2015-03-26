@@ -35,13 +35,13 @@
 			$value = value;
 			$step.text(parseInt(value));
 			$data.target && $($data.target).text(parseInt(value) + $target_value);
-		}
+		};
 		$data.onStop =  function(){
 			$target_value = parseInt($($data.target).text());
 			$data.update && setTimeout(function() {
 		        $this.data('easyPieChart').update(100 - $value);
 		    }, $data.update);
-		}
+		};
 			$(this).easyPieChart($data);
 		});
 	};
@@ -113,7 +113,7 @@
     });
 
 	// docs
-  $('#docs pre code').each(function(){
+  $('#docs').find('pre code').each(function(){
 	    var $this = $(this);
 	    var t = $this.html();
 	    $this.html(t.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
@@ -158,9 +158,9 @@
                   '</span>'+
                 '</a>';	
   setTimeout(function(){addMsg($msg);}, 1500);
-
+    var chosen = $(".chosen-select");
 	//chosen
-	$(".chosen-select").length && $(".chosen-select").chosen();
+	chosen.length && chosen.chosen();
 
   });
 }(window.jQuery);

@@ -8,10 +8,21 @@ import socket
 import struct
 from main import app
 
-
+import api.sons
 # ##############################################################################
 # Welcome
 # ##############################################################################
+network = api.sons.SonsNetwork()
+network.enable_caching()
+@app.route('/sons')
+def sons():
+
+    result = network.search_for_track('Бороо,Татар').get_next_page()
+    for track in result:
+        if track.artist_id is not None:
+            artist = network.get_artist(track.artist_id)
+    return ''
+
 
 @app.route('/')
 def welcome():

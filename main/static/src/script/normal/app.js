@@ -416,7 +416,7 @@ Date.now = Date.now || function () {
             !$item.is('a') && ($item = $item.closest('a'));
             $menu = $item.closest('.dropdown-menu');
             $label = $menu.parent().find('.dropdown-label');
-            $labelHolder = $label.text();
+            var $labelHolder = $label.text();
             $select = $item.parent().find('input');
             $checked = $select.is(':checked');
             if ($select.is(':disabled')) return;
@@ -426,7 +426,7 @@ Date.now = Date.now || function () {
             !$checked && $item.parent().addClass('active');
             $select.prop("checked", !$select.prop("checked"));
 
-            $items = $menu.find('li > input:checked');
+            var $items = $menu.find('li > input:checked');
             var $text;
             if ($items.length) {
                 $text = [];
