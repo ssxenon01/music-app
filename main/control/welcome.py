@@ -78,7 +78,7 @@ def warmup():
 # ##############################################################################
 
 
-@app.before_request
+# @app.before_request
 def limit_remote_addr():
     # TODO: allow SEO bot
 

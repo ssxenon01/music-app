@@ -40,13 +40,14 @@ handlers:
   static_dir: static/
   expiration: 1000d
 
+- url: /cron_task_gdrive
+  script: main.app
+  login: admin
+
 - url: /.*
   script: main.app
   secure: always
 
-- url: /tasks/.*
-  script: main.app
-  login: admin
 
 skip_files:
 - ^(.*/)?#.*#

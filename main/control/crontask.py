@@ -1,4 +1,4 @@
-from lib.pylast import WSError
+from pylast import WSError
 
 __author__ = 'Gundsambuu'
 
@@ -13,14 +13,21 @@ from xml.etree import ElementTree
 from main import app
 import pylast
 from oauth2client.client import SignedJwtAssertionCredentials
+import discogs_client
 
 API_KEY = "8c57be12c08c3586cc46d3609d7f83e8"  # this is a sample key
 API_SECRET = "0e3f2355e220957076f386a8eb884b01"
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
 
+@app.route('/cron_task_discog')
+def cron_task_discog():
+    d = discogs_client.Client('Music/0.1')
+    d.set_consumer_key('kpfqxkBaXXoKlwQzqFMh', 'aqiZATCcprbuBftwEoeBXcQlMHwKnEdx')
+    results = d.search('', title='Uptown Funk - Bruno Mars')
+    return str(results)
 
-@app.route('/tasks/gdrive')
-def task_gdrive():
+@app.route('/cron_task_gdrive')
+def cron_task_gdrive():
     credentials = None
 
     if (config.DEVELOPMENT):
@@ -47,33 +54,43 @@ def task_gdrive():
                 gdrive_id=item['id'],
                 gdrive_etag=item['etag']
             )
-            track = network.get_track(track_db.artist, track_db.title)
-
-            try:
-                if track.get_mbid():
-                    album = track.get_album()
-                    if album:
-                        track_db.album = album.title
-                        track_db.musicbrainz_albumid = album.get_mbid()
-                        track_db.cover_img = track.get_album().get_cover_image(3)
-                    track_db.musicbrainz_trackid = track.get_mbid()
-
-                    artist = track.get_artist()
-                    if artist:
-                        if model.Artist.query(model.Artist.mbid == artist.get_mbid()).count(limit=1) == 0:
-                            artist_db = model.Artist(
-                                name=artist.name,
-                                mbid=artist.get_mbid(),
-                                image_url=artist.get_cover_image(3)
-                            )
-                            artist_db.put()
-                track_db.put()
-            except WSError:
-                pass
+            fill_track_db(track_db)
+        else:
+            track_db = model.Track.query(model.Track.gdrive_id == item['id']).get()
+            track_db.title = array[0]
+            track_db.artist = array[1]
+            fill_track_db(track_db)
 
     return 'ok'
 
 
+def fill_track_db(track_db):
+    track = network.get_track(track_db.artist, track_db.title)
+    try:
+        if track.get_mbid():
+            album = track.get_album()
+            if album:
+                track_db.album = album.title
+                track_db.musicbrainz_albumid = album.get_mbid()
+                track_db.cover_img = track.get_album().get_cover_image(3)
+                logging.info('Cover Image Album: %s' % track_db.cover_img)
+            track_db.musicbrainz_trackid = track.get_mbid()
+
+            artist = track.get_artist()
+            if artist and model.Artist.query(model.Artist.mbid == artist.get_mbid()).count(limit=1) == 0:
+                artist_db = model.Artist(
+                    name=artist.name,
+                    mbid=artist.get_mbid(),
+                    image_url=artist.get_cover_image(3)
+                )
+                logging.info('Cover Image Artist: %s' % artist_db.image_url)
+                if track_db.cover_img is None or track_db.cover_img == '':
+                    track_db.cover_img = artist.get_cover_image(3)
+                artist_db.put()
+        track_db.put()
+    except WSError:
+        logging.error('error')
+        track_db.put()
 
 
 @app.route('/tasks/collect')
@@ -97,22 +114,29 @@ def collect():
 
 @app.route('/tasks/collectdata')
 def collectdata():
-    track_dbs = model.Track.query(model.Track.musicbrainz_trackid == '')
+    track_dbs = model.Track.query()
     counter = 0
     for track_db in track_dbs:
         try:
             track = network.get_track(track_db.artist, track_db.title)
             if track.get_mbid():
-                counter += 1
                 album = track.get_album()
                 if album:
                     track_db.album = album.title
                     track_db.musicbrainz_albumid = album.get_mbid()
+                    track_db.cover_img = track.get_album().get_cover_image(3)
                 track_db.musicbrainz_trackid = track.get_mbid()
-                logging.info('mbid: %s' % track.get_mbid())
-                # for tag in track.get_top_tags():
-                # logging.info(tag.item.name)
                 track_db.put()
-        except Exception, e:
+                artist = track.get_artist()
+                if artist:
+                    if model.Artist.query(model.Artist.mbid == artist.get_mbid()).count(limit=1) == 0:
+                        artist_db = model.Artist(
+                            name=artist.name,
+                            mbid=artist.get_mbid(),
+                            image_url=artist.get_cover_image(3)
+                        )
+                        artist_db.put()
+
+        except WSError, e:
             logging.info(' error : %s' % e.details)
     return "total %i" % counter
