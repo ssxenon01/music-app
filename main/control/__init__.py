@@ -10,3 +10,4 @@ from .test import *
 from .welcome import *
 from .track import *
 from .crontask import *
+from .mood import *

@@ -18,13 +18,14 @@ import discogs_client
 API_KEY = "8c57be12c08c3586cc46d3609d7f83e8"  # this is a sample key
 API_SECRET = "0e3f2355e220957076f386a8eb884b01"
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
+d = discogs_client.Client('Music/0.1')
+d._base_url = 'https://api.discogs.com'
 
-@app.route('/cron_task_discog')
-def cron_task_discog():
-    d = discogs_client.Client('Music/0.1')
-    d.set_consumer_key('kpfqxkBaXXoKlwQzqFMh', 'aqiZATCcprbuBftwEoeBXcQlMHwKnEdx')
-    results = d.search('', title='Uptown Funk - Bruno Mars')
-    return str(results)
+@app.route('/discogs')
+def discogs():
+    results = d.search('', title='Uptown Funk', artist="Bruno Mars", token="mhkqGGqAxmkGFOlbnWRRQZYcqDLxLianrCocIIJE",type="Artist")
+
+    return str(results[0].artists[0].name)
 
 @app.route('/cron_task_gdrive')
 def cron_task_gdrive():
