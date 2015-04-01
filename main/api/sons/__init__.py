@@ -137,11 +137,12 @@ class _Network(object):
             Return an Artist object
         """
 
-        response = _Request(self, 'track/fetchById?id=' + track_id, params={}, request_method='GET').execute(True)
+        response = _Request(self, 'tracks/fetchById?id=' + track_id, params={}, request_method='GET').execute(True)
         track = response['track']
         return Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['albumName'],
                      length=track['length'], media_path=track['mediaPath'], origin=track['origin'],
-                     youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'])
+                     youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'],
+                     artist_name=track['artistName'])
 
     def get_track_list(self, page_number=1):
         response = _Request(self, 'tracks/fetchByPage?page=' + str(page_number), params={},
@@ -151,7 +152,8 @@ class _Network(object):
         for track in tracks:
             seq.append(Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['albumName'],
                              length=track['length'], media_path=track['mediaPath'], origin=track['origin'],
-                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId']))
+                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'],
+                             artist_name=track['artistName']))
 
         return seq
 
@@ -397,6 +399,8 @@ class _Request(object):
         for key in keys:
             if key != "api_sig" and key != "api_key" and key != "sk":
                 cache_key += key + self.params[key]
+
+        cache_key += self.method_name
 
         return hashlib.sha1(cache_key.encode("utf-8")).hexdigest()
 
@@ -716,7 +720,7 @@ class Track():
     """A sons.mn track."""
 
     def __init__(self, id, image, title,
-                 album_name, length, media_path, origin, youtube, lyrics, artist_id):
+                 album_name, length, media_path, origin, youtube, lyrics, artist_id,artist_name):
         self.id = id
         self.image = image
         self.title = title
@@ -727,6 +731,7 @@ class Track():
         self.youtube = youtube
         self.lyrics = lyrics
         self.artist_id = artist_id
+        self.artist_name = artist_name
 
 
 class _Search(_BaseObject):
@@ -829,7 +834,8 @@ class TrackSearch(_Search):
         for track in page['results']:
             seq.append(Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['albumName'],
                              length=track['length'], media_path=track['mediaPath'], origin=track['origin'],
-                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId']))
+                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'],
+                             artist_name=track['artistName']))
         return seq
 
 
