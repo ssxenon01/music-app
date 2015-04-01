@@ -16,7 +16,10 @@ network = api.sons.SonsNetwork()
 network.enable_caching()
 @app.route('/sons')
 def sons():
-
+    """
+        Sons Stream
+        ffmpeg -i "http://stream.sons.mn:6055/COHC/amlst:2915e5da-f54f-4c82-adde-9f49b43c5fed/playlist.m3u8" -f mp3 -acodec mp3 -ab 128k -ar 44100 -vn aнэг.mp3
+    """
     result = network.search_for_track('Бороо,Татар').get_next_page()
     for track in result:
         if track.artist_id is not None:
@@ -26,9 +29,13 @@ def sons():
 
 @app.route('/')
 def welcome():
+    template = 'welcome.html'
+    if flask.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        template = 'welcome_content.html'
+
     discover_list = get_discover_list()
     new_songs = get_new_songs()
-    return flask.render_template('welcome.html',
+    return flask.render_template(template,
                                  html_class='welcome',
                                  discover_list=discover_list,
                                  new_songs=new_songs
@@ -55,11 +62,6 @@ def get_discover_list():
                                  and model.Track.stream_url != "").fetch(limit=10)
         memcache.add('key', data, 60*60)
         return data
-
-
-@app.route('/genres')
-def genres():
-    return flask.render_template('genres.html', html_class='genres')
 
 
 # ##############################################################################

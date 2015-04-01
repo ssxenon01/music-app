@@ -8,15 +8,12 @@ import logging
 import hashlib
 import json
 import time
-import shelve
-import tempfile
 import sys
 from httplib import HTTPConnection
 import htmlentitydefs
 from urllib import quote_plus as url_quote_plus
 
 import six
-
 
 STATUS_INVALID_SERVICE = 2
 STATUS_INVALID_METHOD = 3
@@ -128,7 +125,8 @@ class _Network(object):
             Return an Artist object
         """
 
-        response = _Request(network=self, method_name='artists/fetchById?id='+artist_id, params={}, request_method='GET').execute(True)
+        response = _Request(network=self, method_name='artists/fetchById?id=' + artist_id, params={},
+                            request_method='GET').execute(True)
         artist = response['artist']
 
         return Artist(id=artist['id'], image=artist['image'], name=artist['name'], num_albums=artist['numAlbums'],
@@ -139,17 +137,29 @@ class _Network(object):
             Return an Artist object
         """
 
-        response = _Request(self, 'track/fetchById?id='+track_id, params={}, request_method='GET').execute(True)
+        response = _Request(self, 'track/fetchById?id=' + track_id, params={}, request_method='GET').execute(True)
         track = response['track']
-        return Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['album_name'],
-                     length=track['length'], media_path=track['media_path'], origin=track['origin'],
-                     youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artist_id'])
+        return Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['albumName'],
+                     length=track['length'], media_path=track['mediaPath'], origin=track['origin'],
+                     youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'])
+
+    def get_track_list(self, page_number=1):
+        response = _Request(self, 'tracks/fetchByPage?page=' + str(page_number), params={},
+                            request_method='GET').execute(True)
+        tracks = response['tracks']
+        seq = []
+        for track in tracks:
+            seq.append(Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['albumName'],
+                             length=track['length'], media_path=track['mediaPath'], origin=track['origin'],
+                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId']))
+
+        return seq
 
     def get_album(self, album_id):
         """
             Return an Album object
         """
-        response = _Request(self, 'track/fetchById?id='+album_id, params={}, request_method='GET').execute(True)
+        response = _Request(self, 'track/fetchById?id=' + album_id, params={}, request_method='GET').execute(True)
         album = response['album']
         return Album(id=album['id'], title=album['title'], image=album['image'], artist_name=album['artist_name'],
                      artist_id=album['artist_id'], year=album['year'], duration=album['duration'],
@@ -351,16 +361,16 @@ class _ShelfCacheBackend(object):
     """Used as a backend for caching cacheable requests."""
 
     def get_xml(self, key):
-        return memcache.get('sons_tmp_'+key)
+        return memcache.get('sons_tmp_' + key)
 
     def set_xml(self, key, json_string):
-        memcache.set('sons_tmp_'+key, json_string, 60)
+        memcache.set('sons_tmp_' + key, json_string, 60)
 
 
 class _Request(object):
     """Representing an abstract web service operation."""
 
-    def __init__(self, network, method_name, params={},request_method='POST'):
+    def __init__(self, network, method_name, params={}, request_method='POST'):
 
         self.network = network
         self.params = {}
@@ -506,7 +516,6 @@ class _BaseObject(object):
         self.ws_prefix = ws_prefix
 
     def _request(self, method_name, cacheable=True, params=None):
-
         if not params:
             params = self._get_params()
         return _Request(self.network, method_name, params).execute(cacheable)

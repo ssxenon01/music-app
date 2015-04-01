@@ -20,9 +20,9 @@ class TrackUpdateForm(wtf.Form):
     writer = wtforms.StringField('Writer', filters=[util.strip_filter])
     totaltracks = wtforms.IntegerField('Total Tracks')
     discnumber = wtforms.IntegerField('Disc Number')
-    genre = wtforms.SelectMultipleField('Genre', choices=[(t, t.title()) for t in model.Track.genre._choices],
+    genre = wtforms.SelectMultipleField('Genre', choices=[(t, t.title()) for t in model.Track.genre_list().keys()],
                                         default="unknown")
-    mood = wtforms.SelectMultipleField('Mood', choices=[(t, t.title()) for t in model.Track.genre._choices],
+    mood = wtforms.SelectMultipleField('Mood', choices=[(t, t.title()) for t in model.Track.genre_list().keys()],
                                        default="Okay")
     rating = wtforms.IntegerField('Rating')
     musicbrainz_recordingid = wtforms.StringField('musicbrainz_recordingid', filters=[util.strip_filter])

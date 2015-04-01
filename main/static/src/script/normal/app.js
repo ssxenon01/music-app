@@ -293,9 +293,9 @@ var initTile = function(){
     Bjax.prototype.update = function () {
         this.$element.css('position', '');
         if (!this.$element.is('html')) {
-            if (this.options.el) {
-                this.$content = $(this.$content).find(this.options.el);
-            }
+            //if (this.options.el) {
+            //    this.$content = $(this.$content).find(this.options.el);
+            //}
             this.$element.html(this.$content);
             if(this.options.url == '/moods'){
                 initTile();
