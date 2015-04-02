@@ -62,7 +62,7 @@ def cron_task_gdrive():
     service = build("drive", "v2", http=http, developerKey="listen-fm@appspot.gserviceaccount.com")
 
     param = {}
-    param['q'] = 'mimeType contains "audio" and starred=false and title contains "m4a"'
+    param['q'] = 'mimeType contains "audio" and starred=false'
     param['maxResults'] = 1000
     page_token = None
     last_call_time = 0
@@ -78,7 +78,6 @@ def cron_task_gdrive():
         for item in files['items']:
             file_name = item['title'].replace('.%s' % item['fileExtension'], '')
             if file_name.isdigit():
-
                 track_db = Track.query(Track.sons_id == file_name).get()
                 if track_db is None:
                     track_db = Track(sons_id=file_name)

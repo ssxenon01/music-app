@@ -1,4 +1,4 @@
 cron:
 - description: Yearly retrive drive songs
   url: /tasks/gdrive
-  schedule: every 1 year
+  schedule: 1 of jan 00:00
