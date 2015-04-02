@@ -72,38 +72,67 @@ def cron_task_gdrive():
     param['q'] = 'mimeType contains "audio"'
     files = service.files().list(**param).execute()
     for item in files['items']:
-        file_name = item['title'].replace('.%s' % item['fileExtension'], '')
-        if file_name.isdigit():
-            stream_url = 'https://drive.google.com/uc?id=%s' % item['id']
-            track_db = Track.query(Track.sons_id == file_name).get()
-            if track_db is not None:
-                track_db.gdrive_id = item['id']
-                sons_track = sons_network.get_track(file_name)
-                if sons_track.image != '/uploads/covers/default.jpg':
-                    track_db.cover_img = "http://sons.mn%s" % sons_track.image.replace('uploads', 'image-cache/w244-h244-c')
-                else:
-                    track_db.cover_img = "http://sons.mn/uploads/covers/default.jpg"
-
-                track_db.stream_url = stream_url
-                track_db.put()
-
-        # array = item['title'].replace('.%s' % item['fileExtension'], '').split('-')
-        # if model.Track.query(model.Track.gdrive_id == item['id']).count(limit=1) == 0:
-        #     track_db = model.Track(
-        #         title=array[0],
-        #         artist=array[1],
-        #         stream_url=stream_url,
-        #         gdrive_id=item['id'],
-        #         gdrive_etag=item['etag']
-        #     )
-        #     fill_track_db(track_db)
-        # elif model.Track.query(model.Track.gdrive_id == item['id']).count(limit=1) == 0:
-        #     track_db = model.Track.query(model.Track.gdrive_id == item['id']).get()
-        #     track_db.title = array[0]
-        #     track_db.artist = array[1]
-        #     fill_track_db(track_db)
+        stream_url = 'https://drive.google.com/uc?id=%s' % item['id']
+        array = item['title'].replace('.%s' % item['fileExtension'], '').split('-')
+        if model.Track.query(model.Track.gdrive_id == item['id']).count(limit=1) == 0:
+            track_db = model.Track(
+                title=array[0],
+                artist=array[1],
+                stream_url=stream_url,
+                gdrive_id=item['id'],
+                gdrive_etag=item['etag']
+            )
+            fill_track_db(track_db)
+        else:
+            track_db = model.Track.query(model.Track.gdrive_id == item['id']).get()
+            track_db.title = array[0]
+            track_db.artist = array[1]
+            fill_track_db(track_db)
 
     return 'ok'
+
+
+@app.route('/cron_task_gdrive_mgl')
+def cron_task_gdrive_mgl():
+    credentials = None
+
+    if (config.DEVELOPMENT):
+        client_email = '121688381876-hj5hs4oohukagfep7hqq64iljtn3i0kf@developer.gserviceaccount.com'
+        with open("Music.pem") as f:
+            private_key = f.read()
+        credentials = SignedJwtAssertionCredentials(client_email, private_key, 'https://www.googleapis.com/auth/drive')
+    else:
+        credentials = AppAssertionCredentials(scope='https://www.googleapis.com/auth/drive')
+
+    http = credentials.authorize(httplib2.Http(memcache))
+    service = build("drive", "v2", http=http, developerKey="listen-fm@appspot.gserviceaccount.com")
+    param = {}
+    param['q'] = 'mimeType contains "audio"'
+    # param['maxResults'] = 500
+    page_token = None
+    while True:
+        if page_token:
+            param['pageToken'] = page_token
+        files = service.files().list(**param).execute()
+        page_token = files.get('nextPageToken')
+        for item in files['items']:
+            file_name = item['title'].replace('.%s' % item['fileExtension'], '')
+            if file_name.isdigit():
+                logging.info(file_name)
+                sons_track = sons_network.get_track(file_name)
+                track_db = Track.query(Track.artist == sons_track.artist_name and Track.title == sons_track.title).get()
+                if track_db is None:
+                    track_db = Track(title=sons_track.title, artist=sons_track.artist_name, album=sons_track.album_name,
+                                    gdrive_id=item['id'], language="Mongolian")
+                if 'default' not in sons_track.image:
+                    track_db.cover_img = 'http://sons.mn/'+sons_track.image.replace('/uploads/', 'image-cache/w300-h300-c/')
+                else:
+                    track_db.cover_img = 'http://sons.mn'+sons_track.image
+                track_db.gdrive_id = item['id']
+                track_db.put()
+        if not page_token:
+            break
+    return 'Ok'
 
 
 def fill_track_db(track_db):

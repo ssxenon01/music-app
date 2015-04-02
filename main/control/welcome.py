@@ -8,12 +8,18 @@ import socket
 import struct
 from main import app
 from google.appengine.ext import ndb
+import random
+
 import api.sons
 # ##############################################################################
 # Welcome
 # ##############################################################################
+from model.track import Track
+
 network = api.sons.SonsNetwork()
 network.enable_caching()
+
+
 @app.route('/sons')
 def sons():
     """
@@ -43,23 +49,41 @@ def welcome():
 
 
 def get_new_songs():
-    data = memcache.get('get_new_songs')
+    data = memcache.get('get_new_songs_todo')
     if data is not None:
+        logging.info('from cache')
         return data
     else:
         data = model.Track.query().order(model.Track.created).fetch(limit=8)
-        memcache.set('get_new_songs', data, 60*60)
+        memcache.set('get_new_songs', data, 60 * 60)
         return data
 
 
 def get_discover_list():
-    data = memcache.get('get_discover_list')
-    if data is not None:
-        return data
+    r_k = random.sample(all_keys(), 20)
+
+    # Get those 20 Entities
+    items = ndb.get_multi(r_k)
+
+    return items
+
+    # data = memcache.get('get_discover_list_todo')
+    # if data is not None:
+    # return data
+    # else:
+    #     data = model.Track.query(model.Track.gdrive_id != "" and model.Track.modified != None).order(-model.Track.modified).fetch(limit=10)
+    #     memcache.set('get_discover_list', data, 60*60)
+    #     return data
+
+
+def all_keys():
+    a_k = memcache.get('all_keys')
+    if a_k is None:
+        item_keys = Track.query().filter(Track.gdrive_id != '').fetch(keys_only=True, limit=10000)
+        memcache.set('all_keys', item_keys, 60 * 60 * 3)
+        return item_keys
     else:
-        data = model.Track.query(model.Track.stream_url != '' and model.Track.modified != None).order(-model.Track.modified).fetch(limit=10)
-        memcache.set('get_discover_list', data, 60*60)
-        return data
+        return a_k
 
 
 # ##############################################################################
