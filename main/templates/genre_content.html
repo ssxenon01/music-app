@@ -42,7 +42,7 @@
                               <a data-id="{{ track.gdrive_id }}" data-title="{{ track.title }}" data-artist="{{ track.artist }}"><i class="fa fa-play-circle i-2x"></i></a>
                             </div>
                           </div>
-                          <a {#href="track-detail.html"#}><img src="{{ track.cover_img }}" alt="" class="r r-2x img-full"></a>
+                          <a {#href="track-detail.html"#}><img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" style="background-image: url('{{track.cover_img}}');" alt="" class="r r-2x img-full"></a>
                         </div>
                         <div class="padder-v">
                           <a {#href="track-detail.html"#} data-bjax data-target="#bjax-target" data-el="#bjax-el" data-replace="true" class="text-ellipsis">{{ track.title }}</a>
