@@ -1,5 +1,7 @@
 from pylast import WSError
+
 from model.track import Track
+
 
 __author__ = 'Gundsambuu'
 
@@ -27,34 +29,41 @@ d._base_url = 'https://api.discogs.com'
 sons_network = api.sons.SonsNetwork()
 sons_network.enable_caching()
 
-@app.route('/discogs')
+
+@app.route('/tasks/discogs')
 def discogs():
     results = d.search('', title='Uptown Funk', artist="Bruno Mars", token="mhkqGGqAxmkGFOlbnWRRQZYcqDLxLianrCocIIJE",
                        type="Artist")
 
     return str(results[0].artists[0].name)
 
-@app.route('/itunes')
-def itunes():
 
+@app.route('/tasks/itunes')
+def itunes():
     l = Library("iTunes Music Library.xml")
 
     for idx, song in l.songs.items():
         sons_id = song.location.replace('.mp3', '').split('/')[-1]
+        if sons_id.isdigit():
+            q = Track.query()
 
-        q = Track.query()
-        if q.filter(Track.sons_id == sons_id).count(limit=1) == 0:
-            track_db = Track(title=song.name, sons_id=sons_id, album=song.album, artist=song.artist,
-                             duration=song.total_time, origin=song.grouping, genre=song.genre)
-            track_db.put()
+            if q.filter(Track.sons_id == sons_id).count(limit=1) == 0:
+                track_db = Track(title=song.name, sons_id=sons_id, album=song.album, artist=song.artist,
+                                 duration=song.total_time, origin=song.grouping, genre=song.genre)
+                sons_track = sons_network.get_track(sons_id)
+                if 'default' not in sons_track.image:
+                    track_db.cover_img = 'http://sons.mn/' + sons_track.image.replace('/uploads/',
+                                                                                          'image-cache/w300-h300-c/')
+                else:
+                    track_db.cover_img = 'http://sons.mn' + sons_track.image
+                track_db.put()
 
-        logging.info("%s %s %s %s %s %s" % (idx, song.name, song.genre, song.total_time, song.artist, song.location))
+                logging.info("%s %s %s %s %s %s" % (idx, song.name, song.genre, song.total_time, song.artist, song.location))
 
     return str('asd')
 
 
-
-@app.route('/cron_task_gdrive')
+@app.route('/tasks/gdrive')
 def cron_task_gdrive():
     credentials = None
 
@@ -92,7 +101,7 @@ def cron_task_gdrive():
     return 'ok'
 
 
-@app.route('/cron_task_gdrive_mgl')
+@app.route('/tasks/gdrive/mgl')
 def cron_task_gdrive_mgl():
     credentials = None
 
@@ -104,11 +113,11 @@ def cron_task_gdrive_mgl():
     else:
         credentials = AppAssertionCredentials(scope='https://www.googleapis.com/auth/drive')
 
-    http = credentials.authorize(httplib2.Http(memcache))
+    http = credentials.authorize(httplib2.Http())
     service = build("drive", "v2", http=http, developerKey="listen-fm@appspot.gserviceaccount.com")
     param = {}
     param['q'] = 'mimeType contains "audio"'
-    # param['maxResults'] = 500
+    param['maxResults'] = 500
     page_token = None
     while True:
         if page_token:
@@ -119,17 +128,10 @@ def cron_task_gdrive_mgl():
             file_name = item['title'].replace('.%s' % item['fileExtension'], '')
             if file_name.isdigit():
                 logging.info(file_name)
-                sons_track = sons_network.get_track(file_name)
-                track_db = Track.query(Track.artist == sons_track.artist_name and Track.title == sons_track.title).get()
-                if track_db is None:
-                    track_db = Track(title=sons_track.title, artist=sons_track.artist_name, album=sons_track.album_name,
-                                    gdrive_id=item['id'], language="Mongolian")
-                if 'default' not in sons_track.image:
-                    track_db.cover_img = 'http://sons.mn/'+sons_track.image.replace('/uploads/', 'image-cache/w300-h300-c/')
-                else:
-                    track_db.cover_img = 'http://sons.mn'+sons_track.image
-                track_db.gdrive_id = item['id']
-                track_db.put()
+                track_db = Track.query(Track.sons_id == file_name).get()
+                if track_db is not None:
+                    track_db.gdrive_id = item['id']
+                    track_db.put()
         if not page_token:
             break
     return 'Ok'
@@ -211,3 +213,7 @@ def collectdata():
         except WSError, e:
             logging.info(' error : %s' % e.details)
     return "total %i" % counter
+
+@app.route('/tasks/testing')
+def testing():
+    return "hello"
