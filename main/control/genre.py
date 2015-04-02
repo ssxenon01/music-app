@@ -10,8 +10,6 @@ from model.track import Track
 
 __author__ = 'Gundsambuu'
 
-
-
 @app.route('/genres')
 def genres():
     template = 'genres.html'
@@ -22,8 +20,6 @@ def genres():
 
     track_list = get_track_list_by_genre(selected_genre)
 
-    logging.info(genre_list())
-    # genre_list = model.Track.genre_list()
     return flask.render_template(template,
                                  html_class='genres',
                                  track_list=track_list,
@@ -42,7 +38,7 @@ def genre_list():
             if track.genre is not None:
                 genre_list.append(track.genre)
         memcache.set('genre_list', genre_list, 60 * 60)
-        return data
+        return genre_list
 
 
 def get_track_list_by_genre(genre):

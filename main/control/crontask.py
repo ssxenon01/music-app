@@ -1,4 +1,5 @@
 from pylast import WSError
+from requests.exceptions import ConnectionError
 
 from model.track import Track
 
@@ -11,11 +12,12 @@ import logging
 import config
 import model
 from oauth2client.appengine import AppAssertionCredentials
-from google.appengine.api import urlfetch, memcache
+from google.appengine.api import urlfetch
 from xml.etree import ElementTree
 from main import app
 import pylast
 import api.sons
+import time
 from oauth2client.client import SignedJwtAssertionCredentials
 import discogs_client
 from api.pyItunes import Library
@@ -23,102 +25,51 @@ from api.pyItunes import Library
 API_KEY = "8c57be12c08c3586cc46d3609d7f83e8"  # this is a sample key
 API_SECRET = "0e3f2355e220957076f386a8eb884b01"
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
+
+
 d = discogs_client.Client('Music/0.1')
 d._base_url = 'https://api.discogs.com'
+d.per_page = 1
 
 sons_network = api.sons.SonsNetwork()
-sons_network.enable_caching()
+
+if (config.DEVELOPMENT):
+    folder_id = "0B5oJh-O3y7XneUs3TjI4Vms0dm8"
+    client_email = '121688381876-hj5hs4oohukagfep7hqq64iljtn3i0kf@developer.gserviceaccount.com'
+    with open("Music.pem") as f:
+        private_key = f.read()
+    credentials = SignedJwtAssertionCredentials(client_email, private_key, 'https://www.googleapis.com/auth/drive')
+else:
+    folder_id = "0B5oJh-O3y7XndENrN0diY2RyaWM"
+    credentials = AppAssertionCredentials(scope='https://www.googleapis.com/auth/drive')
+
 
 
 @app.route('/tasks/discogs')
 def discogs():
-    results = d.search('', title='Uptown Funk', artist="Bruno Mars", token="mhkqGGqAxmkGFOlbnWRRQZYcqDLxLianrCocIIJE",
-                       type="Artist")
 
-    return str(results[0].artists[0].name)
+    results = d.search('', title='#ThatPower', artist="Will I Am", token="mhkqGGqAxmkGFOlbnWRRQZYcqDLxLianrCocIIJE",
+                       type="Release")
+    if len(results) > 0:
+        resp = "Title: title"
 
-
-@app.route('/tasks/itunes')
-def itunes():
-    l = Library("iTunes Music Library.xml")
-
-    for idx, song in l.songs.items():
-        sons_id = song.location.replace('.mp3', '').split('/')[-1]
-        if sons_id.isdigit():
-            q = Track.query()
-
-            if q.filter(Track.sons_id == sons_id).count(limit=1) == 0:
-                track_db = Track(title=song.name, sons_id=sons_id, album=song.album, artist=song.artist,
-                                 duration=song.total_time, origin=song.grouping, genre=song.genre)
-                sons_track = sons_network.get_track(sons_id)
-                if 'default' not in sons_track.image:
-                    track_db.cover_img = 'http://sons.mn/' + sons_track.image.replace('/uploads/',
-                                                                                          'image-cache/w300-h300-c/')
-                else:
-                    track_db.cover_img = 'http://sons.mn' + sons_track.image
-                track_db.put()
-
-                logging.info("%s %s %s %s %s %s" % (idx, song.name, song.genre, song.total_time, song.artist, song.location))
-
-    return str('asd')
+    return str(len(results[0].labels))
 
 
 @app.route('/tasks/gdrive')
 def cron_task_gdrive():
-    credentials = None
-
-    if (config.DEVELOPMENT):
-        client_email = '121688381876-hj5hs4oohukagfep7hqq64iljtn3i0kf@developer.gserviceaccount.com'
-        with open("Music.pem") as f:
-            private_key = f.read()
-        credentials = SignedJwtAssertionCredentials(client_email, private_key, 'https://www.googleapis.com/auth/drive')
-    else:
-        credentials = AppAssertionCredentials(scope='https://www.googleapis.com/auth/drive')
-
-    http = credentials.authorize(httplib2.Http(memcache))
-    service = build("drive", "v2", http=http, developerKey="listen-fm@appspot.gserviceaccount.com")
-    param = {}
-    param['q'] = 'mimeType contains "audio"'
-    files = service.files().list(**param).execute()
-    for item in files['items']:
-        stream_url = 'https://drive.google.com/uc?id=%s' % item['id']
-        array = item['title'].replace('.%s' % item['fileExtension'], '').split('-')
-        if model.Track.query(model.Track.gdrive_id == item['id']).count(limit=1) == 0:
-            track_db = model.Track(
-                title=array[0],
-                artist=array[1],
-                stream_url=stream_url,
-                gdrive_id=item['id'],
-                gdrive_etag=item['etag']
-            )
-            fill_track_db(track_db)
-        else:
-            track_db = model.Track.query(model.Track.gdrive_id == item['id']).get()
-            track_db.title = array[0]
-            track_db.artist = array[1]
-            fill_track_db(track_db)
-
-    return 'ok'
-
-
-@app.route('/tasks/gdrive/mgl')
-def cron_task_gdrive_mgl():
-    credentials = None
-
-    if (config.DEVELOPMENT):
-        client_email = '121688381876-hj5hs4oohukagfep7hqq64iljtn3i0kf@developer.gserviceaccount.com'
-        with open("Music.pem") as f:
-            private_key = f.read()
-        credentials = SignedJwtAssertionCredentials(client_email, private_key, 'https://www.googleapis.com/auth/drive')
-    else:
-        credentials = AppAssertionCredentials(scope='https://www.googleapis.com/auth/drive')
-
     http = credentials.authorize(httplib2.Http())
     service = build("drive", "v2", http=http, developerKey="listen-fm@appspot.gserviceaccount.com")
+
     param = {}
-    param['q'] = 'mimeType contains "audio"'
-    param['maxResults'] = 500
+    param['q'] = 'mimeType contains "audio" and starred=false and title contains "m4a"'
+    param['maxResults'] = 1000
     page_token = None
+    last_call_time = 0
+    l = Library("iTunes Music Library.xml")
+
+    itunes_songs = l.songs
+
     while True:
         if page_token:
             param['pageToken'] = page_token
@@ -127,11 +78,64 @@ def cron_task_gdrive_mgl():
         for item in files['items']:
             file_name = item['title'].replace('.%s' % item['fileExtension'], '')
             if file_name.isdigit():
-                logging.info(file_name)
+
                 track_db = Track.query(Track.sons_id == file_name).get()
-                if track_db is not None:
-                    track_db.gdrive_id = item['id']
-                    track_db.put()
+                if track_db is None:
+                    track_db = Track(sons_id=file_name)
+                track_db.gdrive_id = item['id']
+                itunes_song = itunes_songs[file_name]
+                if itunes_song is not None:
+                    track_db.genre = itunes_song.genre
+                    track_db.duration = itunes_song.total_time
+
+                sons_track = sons_network.get_track(file_name)
+                if 'default' not in sons_track.image:
+                    track_db.cover_img = 'http://sons.mn/' + sons_track.image.replace('/uploads/',
+                                                                                      'image-cache/w300-h300-c/')
+                else:
+                    track_db.cover_img = 'http://sons.mn' + sons_track.image
+
+                track_db.album = sons_track.album_name
+                track_db.title = sons_track.title
+                track_db.artist = sons_track.artist_name
+                track_db.origin = 'Mongolian'
+
+                track_db.put()
+                service.files().update(fileId=item['id'], body={'labels.starred': True}).execute()
+            elif ' - ' in file_name:
+                try:
+                    title, artist = file_name.split(' - ', 1)
+
+                    # Adding delay cuz of Discogs Rate-Limit
+                    DELAY_TIME = 1 # time between each request must more that 1 second in order to avoid 60 request per minute
+                    now = time.time()
+
+                    time_since_last = now - last_call_time
+
+                    if time_since_last < DELAY_TIME:
+                        time.sleep(DELAY_TIME - time_since_last)
+
+                    last_call_time = now
+
+                    discog_result = d.search('', title=title, artist=artist.replace('.', ' '),
+                                             token="mhkqGGqAxmkGFOlbnWRRQZYcqDLxLianrCocIIJE", type="Release", per_page=1)
+
+                    if len(discog_result) > 0:
+                        discog_release = discog_result[0]
+                        if isinstance(discog_result[0], discogs_client.Master):
+                            discog_release = discog_result[0].main_release
+                        track_db = Track.query().filter(Track.gdrive_id == item['id']).get()
+                        if track_db is None:
+                            track_db = Track(gdrive_id=item['id'])
+                        track_db.title = discog_release.title
+                        track_db.year = str(discog_release.year)
+                        track_db.cover_img = discog_release.thumb
+                        track_db.genre = ','.join(discog_release.genres)
+                        if len(discog_release.artists) > 0:
+                            track_db.artist = discog_release.artists[0].name
+                        track_db.put()
+                except ConnectionError:
+                    pass
         if not page_token:
             break
     return 'Ok'
@@ -214,6 +218,3 @@ def collectdata():
             logging.info(' error : %s' % e.details)
     return "total %i" % counter
 
-@app.route('/tasks/testing')
-def testing():
-    return "hello"

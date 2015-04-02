@@ -87,12 +87,20 @@ class Library:
                 if self.legacymode:
                     self.songs.append(s)
                 else:
-                    self.songs[int(trackid)] = s
+                    sons_id = s.location.replace('.mp3', '').split('/')[-1]
+                    if sons_id.isdigit():
+                        self.songs[sons_id] = s
+                    else:
+                        self.songs[int(trackid)] = s
             elif self.filesOnly == False:
                 if self.legacymode:
                     self.songs.append(s)
                 else:
-                    self.songs[int(trackid)] = s
+                    sons_id = s.location.replace('.mp3', '').split('/')[-1]
+                    if sons_id.isdigit():
+                        self.songs[sons_id] = s
+                    else:
+                        self.songs[int(trackid)] = s
 
     def getPlaylistNames(self,
                          ignoreList=("Library", "Music", "Movies", "TV Shows", "Purchased", "iTunes DJ", "Podcasts")):
