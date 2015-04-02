@@ -20,7 +20,7 @@ class Track(model.Base):
     composer = ndb.StringProperty()
     lyricist = ndb.StringProperty()
     writer = ndb.StringProperty()
-    genre = ndb.StringProperty()
+    genre = ndb.StringProperty(indexed=True)
     mood = ndb.StringProperty()
     rating = ndb.IntegerProperty()
     musicbrainz_recordingid = ndb.StringProperty(default='')

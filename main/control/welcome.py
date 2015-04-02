@@ -49,9 +49,8 @@ def welcome():
 
 
 def get_new_songs():
-    data = memcache.get('get_new_songs_todo')
+    data = memcache.get('get_new_songs')
     if data is not None:
-        logging.info('from cache')
         return data
     else:
         data = model.Track.query().order(model.Track.created).fetch(limit=8)
@@ -60,21 +59,15 @@ def get_new_songs():
 
 
 def get_discover_list():
-    r_k = random.sample(all_keys(), 20)
 
-    # Get those 20 Entities
-    items = ndb.get_multi(r_k)
-
-    return items
-
-    # data = memcache.get('get_discover_list_todo')
-    # if data is not None:
-    # return data
-    # else:
-    #     data = model.Track.query(model.Track.gdrive_id != "" and model.Track.modified != None).order(-model.Track.modified).fetch(limit=10)
-    #     memcache.set('get_discover_list', data, 60*60)
-    #     return data
-
+    data = memcache.get('get_discover_list')
+    if data is not None:
+        return data
+    else:
+        r_k = random.sample(all_keys(), 20)
+        items = ndb.get_multi(r_k)
+        memcache.set('get_discover_list', items, 60)
+        return items
 
 def all_keys():
     a_k = memcache.get('all_keys')
