@@ -58,8 +58,8 @@ def discogs():
 
 @app.route('/tasks/gdrive')
 def cron_task_gdrive():
-    http = credentials.authorize(httplib2.Http())
-    service = build("drive", "v2", http=http, developerKey="listen-fm@appspot.gserviceaccount.com")
+    http = credentials.authorize(httplib2.Http(timeout=60))
+    service = build("drive", "v2", http=http, developerKey="listen-fm-test@appspot.gserviceaccount.com")
 
     param = {}
     param['q'] = 'mimeType contains "audio" and starred=false'
@@ -77,6 +77,16 @@ def cron_task_gdrive():
         page_token = files.get('nextPageToken')
         for item in files['items']:
             file_name = item['title'].replace('.%s' % item['fileExtension'], '')
+            # Adding delay cuz of Discogs Rate-Limit
+            DELAY_TIME = 1 # time between each request must more that 1 second in order to avoid 60 request per minute
+            now = time.time()
+
+            time_since_last = now - last_call_time
+
+            if time_since_last < DELAY_TIME:
+                time.sleep(DELAY_TIME - time_since_last)
+
+            last_call_time = now
             if file_name.isdigit():
                 track_db = Track.query(Track.sons_id == file_name).get()
                 if track_db is None:
@@ -104,17 +114,6 @@ def cron_task_gdrive():
             elif ' - ' in file_name:
                 try:
                     title, artist = file_name.split(' - ', 1)
-
-                    # Adding delay cuz of Discogs Rate-Limit
-                    DELAY_TIME = 1 # time between each request must more that 1 second in order to avoid 60 request per minute
-                    now = time.time()
-
-                    time_since_last = now - last_call_time
-
-                    if time_since_last < DELAY_TIME:
-                        time.sleep(DELAY_TIME - time_since_last)
-
-                    last_call_time = now
 
                     discog_result = d.search('', title=title, artist=artist.replace('.', ' '),
                                              token="mhkqGGqAxmkGFOlbnWRRQZYcqDLxLianrCocIIJE", type="Release", per_page=1)
@@ -147,10 +146,8 @@ def fill_track_db(track_db):
             album = track.get_album()
             if album:
                 track_db.album = album.title
-                track_db.musicbrainz_albumid = album.get_mbid()
                 track_db.cover_img = track.get_album().get_cover_image(3)
                 logging.info('Cover Image Album: %s' % track_db.cover_img)
-            track_db.musicbrainz_trackid = track.get_mbid()
 
             artist = track.get_artist()
             if artist and model.Artist.query(model.Artist.mbid == artist.get_mbid()).count(limit=1) == 0:
@@ -199,9 +196,7 @@ def collectdata():
                 album = track.get_album()
                 if album:
                     track_db.album = album.title
-                    track_db.musicbrainz_albumid = album.get_mbid()
                     track_db.cover_img = track.get_album().get_cover_image(3)
-                track_db.musicbrainz_trackid = track.get_mbid()
                 track_db.put()
                 artist = track.get_artist()
                 if artist:

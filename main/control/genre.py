@@ -17,28 +17,14 @@ def genres():
         template = 'genre_content.html'
 
     selected_genre = flask.request.args.get('type', '')
-
+    genre_list = Track.genre_list()
     track_list = get_track_list_by_genre(selected_genre)
 
     return flask.render_template(template,
                                  html_class='genres',
                                  track_list=track_list,
-                                 genre_list=genre_list(),
+                                 genre_list=genre_list,
                                  active=flask.request.args.get('type', ''))
-
-
-def genre_list():
-    data = memcache.get('genre_list')
-    if data is not None:
-        return data
-    else:
-        genre_list = []
-        query = ndb.gql("SELECT DISTINCT genre FROM Track").fetch()
-        for track in query:
-            if track.genre is not None:
-                genre_list.append(track.genre)
-        memcache.set('genre_list', genre_list, 60 * 60)
-        return genre_list
 
 
 def get_track_list_by_genre(genre):

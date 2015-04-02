@@ -17,16 +17,9 @@ class Track(model.Base):
     origin = ndb.StringProperty()
     year = ndb.StringProperty()
     duration = ndb.IntegerProperty()
-    composer = ndb.StringProperty()
-    lyricist = ndb.StringProperty()
-    writer = ndb.StringProperty()
-    genre = ndb.StringProperty(indexed=True)
+    genre = ndb.StringProperty()
     mood = ndb.StringProperty()
     rating = ndb.IntegerProperty()
-    musicbrainz_recordingid = ndb.StringProperty(default='')
-    musicbrainz_trackid = ndb.StringProperty(default='')
-    musicbrainz_albumid = ndb.StringProperty(default='')
-    musicbrainz_artistid = ndb.StringProperty(default='')
     gdrive_id = ndb.StringProperty(default='')
     website = ndb.StringProperty(default='')
     stream_url = ndb.StringProperty(default='')
@@ -44,11 +37,6 @@ class Track(model.Base):
         'discnumber': fields.String,
         'genre': fields.String,
         'rating': fields.String,
-        'musicbrainz_recordingid': fields.String,
-        'musicbrainz_trackid': fields.String,
-        'musicbrainz_albumid': fields.String,
-        'musicbrainz_artistid': fields.String,
-        'musicbrainz_albumartistid': fields.String,
         'website': fields.String,
         'stream_url': fields.String,
         'cover_img': fields.String,
