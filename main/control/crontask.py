@@ -1,4 +1,3 @@
-from pylast import WSError
 from requests.exceptions import ConnectionError
 
 from model.track import Track
@@ -8,24 +7,14 @@ __author__ = 'Gundsambuu'
 
 from apiclient.discovery import build
 import httplib2
-import logging
 import config
-import model
 from oauth2client.appengine import AppAssertionCredentials
-from google.appengine.api import urlfetch
-from xml.etree import ElementTree
 from main import app
-import pylast
 import api.sons
 import time
 from oauth2client.client import SignedJwtAssertionCredentials
 import discogs_client
 from api.pyItunes import Library
-
-API_KEY = "8c57be12c08c3586cc46d3609d7f83e8"  # this is a sample key
-API_SECRET = "0e3f2355e220957076f386a8eb884b01"
-network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
-
 
 d = discogs_client.Client('Music/0.1')
 d._base_url = 'https://api.discogs.com'
@@ -34,27 +23,12 @@ d.per_page = 1
 sons_network = api.sons.SonsNetwork()
 
 if (config.DEVELOPMENT):
-    folder_id = "0B5oJh-O3y7XneUs3TjI4Vms0dm8"
     client_email = '121688381876-hj5hs4oohukagfep7hqq64iljtn3i0kf@developer.gserviceaccount.com'
     with open("Music.pem") as f:
         private_key = f.read()
     credentials = SignedJwtAssertionCredentials(client_email, private_key, 'https://www.googleapis.com/auth/drive')
 else:
-    folder_id = "0B5oJh-O3y7XndENrN0diY2RyaWM"
     credentials = AppAssertionCredentials(scope='https://www.googleapis.com/auth/drive')
-
-
-
-@app.route('/tasks/discogs')
-def discogs():
-
-    results = d.search('', title='#ThatPower', artist="Will I Am", token="mhkqGGqAxmkGFOlbnWRRQZYcqDLxLianrCocIIJE",
-                       type="Release")
-    if len(results) > 0:
-        resp = "Title: title"
-
-    return str(len(results[0].labels))
-
 
 @app.route('/tasks/gdrive')
 def cron_task_gdrive():
@@ -142,76 +116,20 @@ def cron_task_gdrive():
     return 'Ok'
 
 
-def fill_track_db(track_db):
-    track = network.get_track(track_db.artist, track_db.title)
-    try:
-        if track.get_mbid():
-            album = track.get_album()
-            if album:
-                track_db.album = album.title
-                track_db.cover_img = track.get_album().get_cover_image(3)
-                logging.info('Cover Image Album: %s' % track_db.cover_img)
-
-            artist = track.get_artist()
-            if artist and model.Artist.query(model.Artist.mbid == artist.get_mbid()).count(limit=1) == 0:
-                artist_db = model.Artist(
-                    name=artist.name,
-                    mbid=artist.get_mbid(),
-                    image_url=artist.get_cover_image(3)
-                )
-                logging.info('Cover Image Artist: %s' % artist_db.image_url)
-                if track_db.cover_img is None or track_db.cover_img == '':
-                    track_db.cover_img = artist.get_cover_image(3)
-                artist_db.put()
-        track_db.put()
-    except WSError:
-        logging.error('error')
-        track_db.put()
-
-
-@app.route('/tasks/collect')
-def collect():
-    url = "http://www.billboard.com/rss/charts/hot-100"
-    result = urlfetch.fetch(url)
-    if result.status_code == 200:
-        xml = ElementTree.fromstring(result.content)
-
-        for item in xml.iterfind('channel/item'):
-            if (model.Track.query(model.Track.title == item.find('chart_item_title').text,
-                                  model.Track.artist == item.find('artist').text).count(limit=1) == 0):
-                track_db = model.Track(
-                    title=item.find('chart_item_title').text,
-                    artist=item.find('artist').text
-                )
-                track_db.put()
-            logging.info(item.find('title').text)
-        return str(xml.findtext(".//title"))
-
-
-@app.route('/tasks/collectdata')
-def collectdata():
-    track_dbs = model.Track.query()
-    counter = 0
-    for track_db in track_dbs:
-        try:
-            track = network.get_track(track_db.artist, track_db.title)
-            if track.get_mbid():
-                album = track.get_album()
-                if album:
-                    track_db.album = album.title
-                    track_db.cover_img = track.get_album().get_cover_image(3)
-                track_db.put()
-                artist = track.get_artist()
-                if artist:
-                    if model.Artist.query(model.Artist.mbid == artist.get_mbid()).count(limit=1) == 0:
-                        artist_db = model.Artist(
-                            name=artist.name,
-                            mbid=artist.get_mbid(),
-                            image_url=artist.get_cover_image(3)
-                        )
-                        artist_db.put()
-
-        except WSError, e:
-            logging.info(' error : %s' % e.details)
-    return "total %i" % counter
-
+# @app.route('/tasks/collect')
+# def collect():
+#     url = "http://www.billboard.com/rss/charts/hot-100"
+#     result = urlfetch.fetch(url)
+#     if result.status_code == 200:
+#         xml = ElementTree.fromstring(result.content)
+#
+#         for item in xml.iterfind('channel/item'):
+#             if (model.Track.query(model.Track.title == item.find('chart_item_title').text,
+#                                   model.Track.artist == item.find('artist').text).count(limit=1) == 0):
+#                 track_db = model.Track(
+#                     title=item.find('chart_item_title').text,
+#                     artist=item.find('artist').text
+#                 )
+#                 track_db.put()
+#             logging.info(item.find('title').text)
+#         return str(xml.findtext(".//title"))

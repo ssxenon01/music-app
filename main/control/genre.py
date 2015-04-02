@@ -2,9 +2,7 @@ import logging
 import urllib
 import flask
 from google.appengine.api import memcache
-from google.appengine.ext import ndb
 from jinja2._markupsafe import Markup
-import model
 from main import app
 from model.track import Track
 
