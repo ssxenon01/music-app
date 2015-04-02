@@ -14,50 +14,24 @@ class Track(model.Base):
     album = ndb.StringProperty()
     title = ndb.StringProperty()
     artist = ndb.StringProperty()
-    albumartist = ndb.StringProperty()
-    originaldate = ndb.StringProperty()
+    origin = ndb.StringProperty()
+    year = ndb.StringProperty()
+    duration = ndb.IntegerProperty()
     composer = ndb.StringProperty()
     lyricist = ndb.StringProperty()
     writer = ndb.StringProperty()
-    tracknumber = ndb.IntegerProperty(default=0)
-    totaltracks = ndb.IntegerProperty(default=0)
-    discnumber = ndb.IntegerProperty(default=0)
     genre = ndb.StringProperty()
-    mood = ndb.StringProperty(repeated=True, choices=[
-        'Accepted', 'Accomplished', 'Aggravated', 'Alone', 'Amused', 'Angry', 'Annoyed', 'Anxious', 'Apathetic',
-        'Ashamed', 'Awake', 'Bewildered',
-        'Bitchy', 'Bittersweet', 'Blah', 'Blank', 'Blissful', 'Bored', 'Bouncy', 'Calm', 'Cheerful', 'Chipper', 'Cold',
-        'Complacent', 'Confused',
-        'Content', 'Cranky', 'Crappy', 'Crazy', 'Crushed', 'Curious', 'Cynical', 'Dark', 'Depressed', 'Determined',
-        'Devious', 'Dirty', 'Disappointed',
-        'Discontent', 'Ditzy', 'Dorky', 'Drained', 'Drunk', 'Ecstatic', 'Energetic', 'Enraged', 'Enthralled', 'Envious',
-        'Exanimate', 'Excited',
-        'Exhausted', 'Flirty', 'Frustrated', 'Full', 'Geeky', 'Giddy', 'Giggly', 'Gloomy', 'Good', 'Grateful', 'Groggy',
-        'Grumpy', 'Guilty', 'Happy',
-        'High', 'Hopeful', 'Hot', 'Hungry', 'Hyper', 'Impressed', 'Indescribable', 'Indifferent', 'Infuriated', 'Irate',
-        'Irritated', 'Jealous',
-        'Jubilant', 'Lazy', 'Lethargic', 'Listless', 'Lonely', 'Loved', 'Mad', 'Melancholy', 'Mellow', 'Mischievous',
-        'Moody', 'Morose', 'Naughty',
-        'Nerdy', 'Not', 'Specified\'Numb', 'Okay', 'Optimistic', 'Peaceful', 'Pessimistic', 'Pissed', 'off\'Pleased',
-        'Predatory', 'Quixotic',
-        'Recumbent', 'Refreshed', 'Rejected', 'Rejuvenated', 'Relaxed', 'Relieved', 'Restless', 'Rushed', 'Sad',
-        'Satisfied', 'Shocked', 'Sick', 'Silly',
-        'Sleepy', 'Smart', 'Stressed', 'Surprised', 'Sympathetic', 'Thankful', 'Tired', 'Touched', 'Uncomfortable',
-        'Weird'
-    ])
+    mood = ndb.StringProperty()
     rating = ndb.IntegerProperty()
     musicbrainz_recordingid = ndb.StringProperty(default='')
     musicbrainz_trackid = ndb.StringProperty(default='')
     musicbrainz_albumid = ndb.StringProperty(default='')
     musicbrainz_artistid = ndb.StringProperty(default='')
-    musicbrainz_albumartistid = ndb.StringProperty(default='')
     gdrive_id = ndb.StringProperty(default='')
-    gdrive_etag = ndb.StringProperty(default='')
-    language = ndb.StringProperty(default='')
     website = ndb.StringProperty(default='')
     stream_url = ndb.StringProperty(default='')
     cover_img = ndb.StringProperty(default='')
-
+    sons_id = ndb.StringProperty()
     FIELDS = {
         'album': fields.String,
         'title': fields.String,
@@ -65,9 +39,7 @@ class Track(model.Base):
         'albumartist': fields.String,
         'originaldate': fields.String,
         'composer': fields.String,
-        'lyricist': fields.List(fields.String),
         'mood': fields.List(fields.String),
-        'writer': fields.String,
         'totaltracks': fields.String,
         'discnumber': fields.String,
         'genre': fields.String,
@@ -77,7 +49,6 @@ class Track(model.Base):
         'musicbrainz_albumid': fields.String,
         'musicbrainz_artistid': fields.String,
         'musicbrainz_albumartistid': fields.String,
-        'language': fields.String,
         'website': fields.String,
         'stream_url': fields.String,
         'cover_img': fields.String,
@@ -94,6 +65,11 @@ class Track(model.Base):
         else:
             return cached
 
-
+    def get_duration_time(self):
+        if self.duration:
+            m, s = divmod(int(self.duration)/1000, 60)
+            return "%02d:%02d" % (m, s)
+        else:
+            return None
 
     FIELDS.update(model.Base.FIELDS)

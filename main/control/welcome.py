@@ -7,7 +7,7 @@ import model
 import socket
 import struct
 from main import app
-
+from google.appengine.ext import ndb
 import api.sons
 # ##############################################################################
 # Welcome
@@ -45,11 +45,10 @@ def welcome():
 def get_new_songs():
     data = memcache.get('get_new_songs')
     if data is not None:
-        logging.info('from cache')
         return data
     else:
         data = model.Track.query().order(model.Track.created).fetch(limit=8)
-        memcache.add('key', data, 60*60)
+        memcache.set('get_new_songs', data, 60*60)
         return data
 
 
@@ -58,9 +57,8 @@ def get_discover_list():
     if data is not None:
         return data
     else:
-        data = model.Track.query(model.Track.musicbrainz_trackid != ''
-                                 and model.Track.stream_url != "").fetch(limit=10)
-        memcache.add('key', data, 60*60)
+        data = model.Track.query(model.Track.stream_url != '' and model.Track.modified != None).order(-model.Track.modified).fetch(limit=10)
+        memcache.set('get_discover_list', data, 60*60)
         return data
 
 

@@ -137,11 +137,12 @@ class _Network(object):
             Return an Artist object
         """
 
-        response = _Request(self, 'track/fetchById?id=' + track_id, params={}, request_method='GET').execute(True)
+        response = _Request(self, 'tracks/fetchById?id=' + track_id, params={}, request_method='GET').execute(True)
         track = response['track']
         return Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['albumName'],
                      length=track['length'], media_path=track['mediaPath'], origin=track['origin'],
-                     youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'])
+                     youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'],
+                     artist_name=track['artistName'])
 
     def get_track_list(self, page_number=1):
         response = _Request(self, 'tracks/fetchByPage?page=' + str(page_number), params={},
@@ -151,7 +152,21 @@ class _Network(object):
         for track in tracks:
             seq.append(Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['albumName'],
                              length=track['length'], media_path=track['mediaPath'], origin=track['origin'],
-                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId']))
+                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'],
+                             artist_name=track['artistName']))
+
+        return seq
+
+    def get_album_list(self, page_number=1):
+        response = _Request(self, 'albums/fetchByPage?page=' + str(page_number), params={},
+                            request_method='GET').execute(True)
+        albums = response['albums']
+        seq = []
+        for album in albums:
+            seq.append(
+                Album(id=album['id'], title=album['title'], image=album['image'], artist_name=album['artistName'],
+                      artist_id=album['artistId'], year=album['year'], duration=album['duration'],
+                      num_tracks=album['numTracks']))
 
         return seq
 
@@ -161,9 +176,9 @@ class _Network(object):
         """
         response = _Request(self, 'track/fetchById?id=' + album_id, params={}, request_method='GET').execute(True)
         album = response['album']
-        return Album(id=album['id'], title=album['title'], image=album['image'], artist_name=album['artist_name'],
-                     artist_id=album['artist_id'], year=album['year'], duration=album['duration'],
-                     num_tracks=album['num_tracks'])
+        return Album(id=album['id'], title=album['title'], image=album['image'], artist_name=album['artistName'],
+                     artist_id=album['artistId'], year=album['year'], duration=album['duration'],
+                     num_tracks=album['numTracks'])
 
     def _get_url(self, domain, url_type):
         return "http://%s/%s" % (
@@ -241,86 +256,144 @@ class _Network(object):
 
         return self.cache_backend
 
-    def search_for_album(self, album_name):
-        """Searches for an album by its name. Returns a AlbumSearch object.
-        Use get_next_page() to retrieve sequences of results."""
+    def get_top_chart(self):
+        """
+           Return an track list object
+       """
 
-        return AlbumSearch(album_name, self)
-
-    def search_for_artist(self, artist_name):
-        """Searches of an artist by its name. Returns a ArtistSearch object.
-        Use get_next_page() to retrieve sequences of results."""
-
-        return ArtistSearch(artist_name, self)
-
-    def search_for_track(self, query):
-        """Searches of a track by its name and its artist. Set artist to an
-        empty string if not available.
-        Returns a TrackSearch object.
-        Use get_next_page() to retrieve sequences of results."""
-
-        return TrackSearch(query, self)
-
-    def get_track_by_sons_id(self, sons_id):
-        """Looks up a track by its MusicBrainz ID"""
-
-        params = {"id": sons_id}
-
-        doc = _Request(self, "track.getInfo", params).execute(True)
-
-        return Track(_extract(doc, "name", 1), _extract(doc, "name"), self)
-
-    def get_artist_by_sonsid(self, sons_id):
-        """Loooks up an artist by its MusicBrainz ID"""
-
-        params = {"id": sons_id}
-
-        doc = _Request(self, "artist.getInfo", params).execute(True)
-
-        return Artist(_extract(doc, "name"), self)
-
-    def get_album_by_sonsid(self, sons_id):
-        """Looks up an album by its MusicBrainz ID"""
-
-        params = {"id": sons_id}
-
-        doc = _Request(self, "album.getInfo", params).execute(True)
-
-        return Album(_extract(doc, "artist"), _extract(doc, "name"), self)
-
-
-    def get_play_links(self, link_type, things, cacheable=True):
-        method = link_type + ".getPlaylinks"
-        params = {}
-
-        for i, thing in enumerate(things):
-            if link_type == "artist":
-                params['artist[' + str(i) + ']'] = thing
-            elif link_type == "album":
-                params['artist[' + str(i) + ']'] = thing.artist
-                params['album[' + str(i) + ']'] = thing.title
-            elif link_type == "track":
-                params['artist[' + str(i) + ']'] = thing.artist
-                params['track[' + str(i) + ']'] = thing.title
-
-        doc = _Request(self, method, params).execute(cacheable)
-
+        response = _Request(self, 'chart/fetchAll?chartType=mongolian', params={},
+                            request_method='GET').execute(True)
+        tracks = response['tracks']
         seq = []
-
-        for node in doc.getElementsByTagName("externalids"):
-            spotify = _extract(node, "spotify")
-            seq.append(spotify)
+        for track in tracks:
+            seq.append(Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['albumName'],
+                             length=track['length'], media_path=track['mediaPath'], origin=track['origin'],
+                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'],
+                             artist_name=track['artistName']))
 
         return seq
 
-    def get_artist_play_links(self, artists, cacheable=True):
-        return self.get_play_links("artist", artists, cacheable)
+    def get_playlist_page(self, page=1):
+        """
+           Return an track list object
+       """
+        print 'playlists/fetchByPage?orderBy=recent&page=' + str(page)
+        response = _Request(self, 'playlists/fetchByPage?orderBy=rating&page=' + str(page), params={},
+                            request_method='GET').execute(True)
+        playlist_list = response['playlists']
+        seq = []
+        for playlist in playlist_list:
+            seq.append({
+                "id": playlist['id'],
+                "image": playlist['image'],
+                "name": playlist['name'],
+            })
 
-    def get_album_play_links(self, albums, cacheable=True):
-        return self.get_play_links("album", albums, cacheable)
+        return seq
 
-    def get_track_play_links(self, tracks, cacheable=True):
-        return self.get_play_links("track", tracks, cacheable)
+    def fetch_playlist(self, playlist_id):
+
+        response = _Request(self, 'tracks/fetchByPlaylist?playlistId=' + str(playlist_id), params={},
+                            request_method='GET').execute(True)
+        tracks = response['tracks']
+        seq = []
+        for track in tracks:
+            seq.append(Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['albumName'],
+                             length=track['length'], media_path=track['mediaPath'], origin=track['origin'],
+                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'],
+                             artist_name=track['artistName']))
+
+        return seq
+
+
+def search_for_album(self, album_name):
+    """Searches for an album by its name. Returns a AlbumSearch object.
+    Use get_next_page() to retrieve sequences of results."""
+
+    return AlbumSearch(album_name, self)
+
+
+def search_for_artist(self, artist_name):
+    """Searches of an artist by its name. Returns a ArtistSearch object.
+    Use get_next_page() to retrieve sequences of results."""
+
+    return ArtistSearch(artist_name, self)
+
+
+def search_for_track(self, query):
+    """Searches of a track by its name and its artist. Set artist to an
+    empty string if not available.
+    Returns a TrackSearch object.
+    Use get_next_page() to retrieve sequences of results."""
+
+    return TrackSearch(query, self)
+
+
+def get_track_by_sons_id(self, sons_id):
+    """Looks up a track by its MusicBrainz ID"""
+
+    params = {"id": sons_id}
+
+    doc = _Request(self, "track.getInfo", params).execute(True)
+
+    return Track(_extract(doc, "name", 1), _extract(doc, "name"), self)
+
+
+def get_artist_by_sonsid(self, sons_id):
+    """Loooks up an artist by its MusicBrainz ID"""
+
+    params = {"id": sons_id}
+
+    doc = _Request(self, "artist.getInfo", params).execute(True)
+
+    return Artist(_extract(doc, "name"), self)
+
+
+def get_album_by_sonsid(self, sons_id):
+    """Looks up an album by its MusicBrainz ID"""
+
+    params = {"id": sons_id}
+
+    doc = _Request(self, "album.getInfo", params).execute(True)
+
+    return Album(_extract(doc, "artist"), _extract(doc, "name"), self)
+
+
+def get_play_links(self, link_type, things, cacheable=True):
+    method = link_type + ".getPlaylinks"
+    params = {}
+
+    for i, thing in enumerate(things):
+        if link_type == "artist":
+            params['artist[' + str(i) + ']'] = thing
+        elif link_type == "album":
+            params['artist[' + str(i) + ']'] = thing.artist
+            params['album[' + str(i) + ']'] = thing.title
+        elif link_type == "track":
+            params['artist[' + str(i) + ']'] = thing.artist
+            params['track[' + str(i) + ']'] = thing.title
+
+    doc = _Request(self, method, params).execute(cacheable)
+
+    seq = []
+
+    for node in doc.getElementsByTagName("externalids"):
+        spotify = _extract(node, "spotify")
+        seq.append(spotify)
+
+    return seq
+
+
+def get_artist_play_links(self, artists, cacheable=True):
+    return self.get_play_links("artist", artists, cacheable)
+
+
+def get_album_play_links(self, albums, cacheable=True):
+    return self.get_play_links("album", albums, cacheable)
+
+
+def get_track_play_links(self, tracks, cacheable=True):
+    return self.get_play_links("track", tracks, cacheable)
 
 
 class SonsNetwork(_Network):
@@ -397,7 +470,7 @@ class _Request(object):
         for key in keys:
             if key != "api_sig" and key != "api_key" and key != "sk":
                 cache_key += key + self.params[key]
-
+        cache_key += self.method_name
         return hashlib.sha1(cache_key.encode("utf-8")).hexdigest()
 
     def _get_cached_response(self):
@@ -430,7 +503,6 @@ class _Request(object):
             'X-CSRF-Guard': 'on'
         }
         (HOST_NAME, HOST_SUBDIR) = self.network.ws_server
-        logging.info(self.network.ws_server)
         if self.network.is_proxy_enabled():
             conn = HTTPConnection(
                 host=self.network._get_proxy()[0],
@@ -483,9 +555,8 @@ class _Request(object):
 
         if not doc['success']:
             e = doc['error']
-            status = doc['code']
-            details = doc
-            raise WSError(self.network, status, details)
+            print e.encode('utf-8')
+            raise WSError(self.network, 500, response)
 
 
 def _string_output(funct):
@@ -700,6 +771,19 @@ class Album(object):
         self.duration = duration
         self.num_tracks = num_tracks
 
+    def get_tracks(self, network):
+        response = _Request(network, 'tracks/fetchByAlbum?albumId=' + str(self.id), params={},
+                            request_method='GET').execute(True)
+        tracks = response['tracks']
+        seq = []
+        for track in tracks:
+            seq.append(Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['albumName'],
+                             length=track['length'], media_path=track['mediaPath'], origin=track['origin'],
+                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'],
+                             artist_name=track['artistName']))
+
+        return seq
+
 
 class Artist():
     """An artist."""
@@ -716,7 +800,7 @@ class Track():
     """A sons.mn track."""
 
     def __init__(self, id, image, title,
-                 album_name, length, media_path, origin, youtube, lyrics, artist_id):
+                 album_name, length, media_path, origin, youtube, lyrics, artist_id, artist_name):
         self.id = id
         self.image = image
         self.title = title
@@ -727,6 +811,7 @@ class Track():
         self.youtube = youtube
         self.lyrics = lyrics
         self.artist_id = artist_id
+        self.artist_name = artist_name
 
 
 class _Search(_BaseObject):
@@ -829,7 +914,8 @@ class TrackSearch(_Search):
         for track in page['results']:
             seq.append(Track(id=track['id'], image=track['image'], title=track['title'], album_name=track['albumName'],
                              length=track['length'], media_path=track['mediaPath'], origin=track['origin'],
-                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId']))
+                             youtube=track['youtube'], lyrics=track['lyrics'], artist_id=track['artistId'],
+                             artist_name=track['artistName']))
         return seq
 
 

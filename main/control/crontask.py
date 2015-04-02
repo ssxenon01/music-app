@@ -1,4 +1,5 @@
 from pylast import WSError
+from model.track import Track
 
 __author__ = 'Gundsambuu'
 
@@ -12,8 +13,10 @@ from google.appengine.api import urlfetch, memcache
 from xml.etree import ElementTree
 from main import app
 import pylast
+import api.sons
 from oauth2client.client import SignedJwtAssertionCredentials
 import discogs_client
+from api.pyItunes import Library
 
 API_KEY = "8c57be12c08c3586cc46d3609d7f83e8"  # this is a sample key
 API_SECRET = "0e3f2355e220957076f386a8eb884b01"
@@ -21,11 +24,35 @@ network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
 d = discogs_client.Client('Music/0.1')
 d._base_url = 'https://api.discogs.com'
 
+sons_network = api.sons.SonsNetwork()
+sons_network.enable_caching()
+
 @app.route('/discogs')
 def discogs():
-    results = d.search('', title='Uptown Funk', artist="Bruno Mars", token="mhkqGGqAxmkGFOlbnWRRQZYcqDLxLianrCocIIJE",type="Artist")
+    results = d.search('', title='Uptown Funk', artist="Bruno Mars", token="mhkqGGqAxmkGFOlbnWRRQZYcqDLxLianrCocIIJE",
+                       type="Artist")
 
     return str(results[0].artists[0].name)
+
+@app.route('/itunes')
+def itunes():
+
+    l = Library("iTunes Music Library.xml")
+
+    for idx, song in l.songs.items():
+        sons_id = song.location.replace('.mp3', '').split('/')[-1]
+
+        q = Track.query()
+        if q.filter(Track.sons_id == sons_id).count(limit=1) == 0:
+            track_db = Track(title=song.name, sons_id=sons_id, album=song.album, artist=song.artist,
+                             duration=song.total_time, origin=song.grouping, genre=song.genre)
+            track_db.put()
+
+        logging.info("%s %s %s %s %s %s" % (idx, song.name, song.genre, song.total_time, song.artist, song.location))
+
+    return str('asd')
+
+
 
 @app.route('/cron_task_gdrive')
 def cron_task_gdrive():
@@ -42,25 +69,39 @@ def cron_task_gdrive():
     http = credentials.authorize(httplib2.Http(memcache))
     service = build("drive", "v2", http=http, developerKey="listen-fm@appspot.gserviceaccount.com")
     param = {}
-    param['q'] = 'modifiedDate >= "2015-03-22T12:00:00-08:00" and mimeType contains "audio"'
+    param['q'] = 'mimeType contains "audio"'
     files = service.files().list(**param).execute()
     for item in files['items']:
-        stream_url = 'https://drive.google.com/uc?id=%s' % item['id']
-        array = item['title'].replace('.%s' % item['fileExtension'], '').split('-')
-        if model.Track.query(model.Track.gdrive_id == item['id']).count(limit=1) == 0:
-            track_db = model.Track(
-                title=array[0],
-                artist=array[1],
-                stream_url=stream_url,
-                gdrive_id=item['id'],
-                gdrive_etag=item['etag']
-            )
-            fill_track_db(track_db)
-        else:
-            track_db = model.Track.query(model.Track.gdrive_id == item['id']).get()
-            track_db.title = array[0]
-            track_db.artist = array[1]
-            fill_track_db(track_db)
+        file_name = item['title'].replace('.%s' % item['fileExtension'], '')
+        if file_name.isdigit():
+            stream_url = 'https://drive.google.com/uc?id=%s' % item['id']
+            track_db = Track.query(Track.sons_id == file_name).get()
+            if track_db is not None:
+                track_db.gdrive_id = item['id']
+                sons_track = sons_network.get_track(file_name)
+                if sons_track.image != '/uploads/covers/default.jpg':
+                    track_db.cover_img = "http://sons.mn%s" % sons_track.image.replace('uploads', 'image-cache/w244-h244-c')
+                else:
+                    track_db.cover_img = "http://sons.mn/uploads/covers/default.jpg"
+
+                track_db.stream_url = stream_url
+                track_db.put()
+
+        # array = item['title'].replace('.%s' % item['fileExtension'], '').split('-')
+        # if model.Track.query(model.Track.gdrive_id == item['id']).count(limit=1) == 0:
+        #     track_db = model.Track(
+        #         title=array[0],
+        #         artist=array[1],
+        #         stream_url=stream_url,
+        #         gdrive_id=item['id'],
+        #         gdrive_etag=item['etag']
+        #     )
+        #     fill_track_db(track_db)
+        # elif model.Track.query(model.Track.gdrive_id == item['id']).count(limit=1) == 0:
+        #     track_db = model.Track.query(model.Track.gdrive_id == item['id']).get()
+        #     track_db.title = array[0]
+        #     track_db.artist = array[1]
+        #     fill_track_db(track_db)
 
     return 'ok'
 
