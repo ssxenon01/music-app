@@ -59,7 +59,7 @@ def discogs():
 @app.route('/tasks/gdrive')
 def cron_task_gdrive():
     http = credentials.authorize(httplib2.Http(timeout=60))
-    service = build("drive", "v2", http=http, developerKey="listen-fm-test@appspot.gserviceaccount.com")
+    service = build("drive", "v2", http=http, developerKey="listen-fm@appspot.gserviceaccount.com")
 
     param = {}
     param['q'] = 'mimeType contains "audio" and starred=false'
@@ -110,7 +110,8 @@ def cron_task_gdrive():
                 track_db.origin = 'Mongolian'
 
                 track_db.put()
-                service.files().update(fileId=item['id'], body={'labels.starred': True}).execute()
+                if not config.DEVELOPMENT:
+                    service.files().update(fileId=item['id'], body={'labels.starred': True}).execute()
             elif ' - ' in file_name:
                 try:
                     title, artist = file_name.split(' - ', 1)
@@ -132,6 +133,8 @@ def cron_task_gdrive():
                         if len(discog_release.artists) > 0:
                             track_db.artist = discog_release.artists[0].name
                         track_db.put()
+                        if not config.DEVELOPMENT:
+                            service.files().update(fileId=item['id'], body={'labels.starred': True}).execute()
                 except ConnectionError:
                     pass
         if not page_token:

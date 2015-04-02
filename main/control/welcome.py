@@ -64,7 +64,8 @@ def get_discover_list():
     if data is not None:
         return data
     else:
-        r_k = random.sample(all_keys(), 20)
+        size = len(all_keys())
+        r_k = random.sample(all_keys(), 20 if size > 20 else size)
         items = ndb.get_multi(r_k)
         memcache.set('get_discover_list', items, 60)
         return items
