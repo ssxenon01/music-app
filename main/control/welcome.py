@@ -20,17 +20,14 @@ network = api.sons.SonsNetwork()
 network.enable_caching()
 
 
-@app.route('/sons')
-def sons():
-    """
-        Sons Stream
-        ffmpeg -i "http://stream.sons.mn:6055/COHC/amlst:2915e5da-f54f-4c82-adde-9f49b43c5fed/playlist.m3u8" -f mp3 -acodec mp3 -ab 128k -ar 44100 -vn aнэг.mp3
-    """
-    result = network.search_for_track('Бороо,Татар').get_next_page()
-    for track in result:
-        if track.artist_id is not None:
-            artist = network.get_artist(track.artist_id)
-    return ''
+@app.route('/test')
+def test():
+    track_db = Track.query().filter('guys' == Track.artist).fetch()
+
+    for track in track_db:
+        logging.info(track.title)
+
+    return 'ok'
 
 
 @app.route('/')
@@ -59,7 +56,6 @@ def get_new_songs():
 
 
 def get_discover_list():
-
     data = memcache.get('get_discover_list')
     if data is not None:
         return data
@@ -69,6 +65,7 @@ def get_discover_list():
         items = ndb.get_multi(r_k)
         memcache.set('get_discover_list', items, 60)
         return items
+
 
 def all_keys():
     a_k = memcache.get('all_keys')
