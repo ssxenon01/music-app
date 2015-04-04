@@ -50,7 +50,7 @@ def get_new_songs():
     if data is not None:
         return data
     else:
-        data = model.Track.query().order(model.Track.created).fetch(limit=8)
+        data = model.Track.query().order(-model.Track.created).fetch(limit=8)
         memcache.set('get_new_songs', data, 60 * 60)
         return data
 
