@@ -30,7 +30,10 @@ def get_track_list_by_genre(genre):
     if data is not None:
         return data
     else:
-        track_list = Track.query().filter(Track.genre == genre).fetch(limit=18)
+        query = Track.query()
+        if genre:
+            query = query.filter(Track.genre == genre)
+        track_list = query.fetch(limit=18)
         memcache.set('t_l_b_g'+genre, track_list, 60 * 60)
         return track_list
 
